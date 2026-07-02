@@ -46,6 +46,29 @@
 
     const mutex = new Mutex();
 
+    function sleepSync(ms) {
+        const end = Date.now() + ms;
+        while (Date.now() < end) {}
+    }
+
+    function writeFileAtomicSyncWithRetry(filePath, data) {
+        const delays = [20, 50, 100, 200, 500];
+        let lastError = null;
+        for (let i = 0; i <= delays.length; i++) {
+            try {
+                writeFileAtomic.sync(filePath, data);
+                return;
+            } catch (error) {
+                lastError = error;
+                if (!error || !["EPERM", "EACCES", "EBUSY"].includes(error.code) || i === delays.length) {
+                    break;
+                }
+                sleepSync(delays[i]);
+            }
+        }
+        throw lastError;
+    }
+
     async function updateDocumentTimeSpent() {
         const configData = _configData;
         const nowDocument = _nowDocument;
@@ -73,7 +96,7 @@
                     || (new Date().getTime() - documentValue.lastModifiedTime) <= idleTimeout * 60 * 1000)) {
                 documentValue.timeSpent ++;
             }
-            writeFileAtomic.sync(documentValueFilePath, JSON.stringify(documentValue, null, 2));
+            writeFileAtomicSyncWithRetry(documentValueFilePath, JSON.stringify(documentValue, null, 2));
         } catch (error) {
             throw error;
         } finally {
@@ -137,7 +160,7 @@
             documentIdToCreateTime[documentInfo.id] = documentSettings.createTime;
         } catch (error) {
             _nowDocument = defaultNowDocument;
-            writeFileAtomic.sync(nowDocumentFilePath, JSON.stringify(_nowDocument, null, 2));
+            writeFileAtomicSyncWithRetry(nowDocumentFilePath, JSON.stringify(_nowDocument, null, 2));
             return;
         }
         
@@ -148,7 +171,7 @@
         }
         const documentValueFilePath = path.join(documentValueFolderPath, `${documentSettings.createTime}.json`);
         if (!fs.existsSync(documentValueFilePath)) {
-            writeFileAtomic.sync(documentValueFilePath, JSON.stringify(defaultDocumentValue, null, 2));
+            writeFileAtomicSyncWithRetry(documentValueFilePath, JSON.stringify(defaultDocumentValue, null, 2));
         }
 
         _nowDocument = {
@@ -159,7 +182,7 @@
             isGettingImage: isGettingImage,
             bounds: documentInfo.bounds,
         }
-        writeFileAtomic.sync(nowDocumentFilePath, JSON.stringify(_nowDocument, null, 2));
+        writeFileAtomicSyncWithRetry(nowDocumentFilePath, JSON.stringify(_nowDocument, null, 2));
     }
 
     async function loopUpdateDoument() {
@@ -267,61 +290,51 @@
         }
         isGettingImage = true;
 
-        let pixmap = null;
-        let saveSettings = null;
         try{
+            let pixmap = null;
+            let saveSettings = null;
             [pixmap, saveSettings] = await getPixmapAndSaveSettings(changedEvent.id, configData);
-        } catch (error) {
-            isGettingImage = false;
-            return;
-        }
 
-        const imageFolderPath = path.join(configData.processImageFolderPath, documentCreateTime);
-        if (!fs.existsSync(imageFolderPath)) {
-            fs.mkdirSync(imageFolderPath, { recursive: true });
-        }
-
-        let documentValue = null;
-        const documentValueFilePath = path.join(F_Record_Dir, "documentValues", `${documentCreateTime}.json`);
-        if (fs.existsSync(documentValueFilePath)) {
-            documentValue = {
-                ...defaultDocumentValue,
-                ...JSON.parse(fs.readFileSync(documentValueFilePath, "utf-8")),
+            const imageFolderPath = path.join(configData.processImageFolderPath, documentCreateTime);
+            if (!fs.existsSync(imageFolderPath)) {
+                fs.mkdirSync(imageFolderPath, { recursive: true });
             }
-        } else {
-            isGettingImage = false;
-            return;
-        }
 
-        const imageName = `${pad(documentValue.count+1, 6)}.jpg`;
-        const imageFilePath = path.join(imageFolderPath, imageName);
-        try{
-            await savePixmap(pixmap, imageFilePath, saveSettings);
-        } catch (error) {
-            console.log('savePixmap error: ', error);
-            isGettingImage = false;
-            return;
-        }
-
-        const unlock = await mutex.lock();
-        try{
-            documentValue = defaultDocumentValue;
+            let documentValue = null;
+            const documentValueFilePath = path.join(F_Record_Dir, "documentValues", `${documentCreateTime}.json`);
             if (fs.existsSync(documentValueFilePath)) {
                 documentValue = {
-                    ...documentValue,
+                    ...defaultDocumentValue,
                     ...JSON.parse(fs.readFileSync(documentValueFilePath, "utf-8")),
                 }
+            } else {
+                return;
             }
-            documentValue.count ++;
-            documentValue.lastModifiedTime = new Date().getTime();
-            writeFileAtomic.sync(documentValueFilePath, JSON.stringify(documentValue, null, 2));
-        } catch (error) {
-            throw error;
-        } finally {
-            unlock();
-        }
 
-        isGettingImage = false;
+            const imageName = `${pad(documentValue.count+1, 6)}.jpg`;
+            const imageFilePath = path.join(imageFolderPath, imageName);
+            await savePixmap(pixmap, imageFilePath, saveSettings);
+
+            const unlock = await mutex.lock();
+            try{
+                documentValue = defaultDocumentValue;
+                if (fs.existsSync(documentValueFilePath)) {
+                    documentValue = {
+                        ...documentValue,
+                        ...JSON.parse(fs.readFileSync(documentValueFilePath, "utf-8")),
+                    }
+                }
+                documentValue.count ++;
+                documentValue.lastModifiedTime = new Date().getTime();
+                writeFileAtomicSyncWithRetry(documentValueFilePath, JSON.stringify(documentValue, null, 2));
+            } finally {
+                unlock();
+            }
+        } catch (error) {
+            _generator._logger.error("handlePixelChanged error: ", error.stack);
+        } finally {
+            isGettingImage = false;
+        }
     }
 
     async function handleImageChanged(changedEvent) {
