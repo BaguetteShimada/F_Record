@@ -11,6 +11,7 @@ import { Text } from '@adobe/react-spectrum';
 import { useTranslation } from 'react-i18next';
 import { FPS } from './constants';
 import type { ConfigData, CurrentDocumentValue, ExportProgress, ExportSettings } from './models';
+import { estimateReplayDurationSeconds, getReplayDurationPresetSeconds } from './exportDurationOptions';
 import { prepareExportReplayParams, runPreparedExportReplay } from './exportReplayService';
 import { getExportFailureMessageDescriptor } from './exportErrors';
 
@@ -33,9 +34,9 @@ function ExportReplayButton({
 }: ExportReplayButtonProps) {
     const { t } = useTranslation();
 
-    const estimateDuration = () => {
-        return Math.floor((documentValue.count ?? 0) / FPS) + 3;
-    }
+    const estimatedDuration = estimateReplayDurationSeconds(documentValue.count, FPS);
+    const durationPresets = getReplayDurationPresetSeconds(documentValue.count, FPS);
+    const hasDurationPreset = (duration: number) => durationPresets.indexOf(duration) >= 0;
 
     const getExportFailureMessage = (error: unknown): string => {
         const message = getExportFailureMessageDescriptor(error);
@@ -135,11 +136,11 @@ function ExportReplayButton({
                                                 });
                                             }}
                                             width="size-1600">
-                                            {15 < estimateDuration() && <Item key="15">{15 + t('s')}</Item>}
-                                            {30 < estimateDuration() && <Item key="30">{30 + t('s')}</Item>}
-                                            {60 < estimateDuration() && <Item key="60">{60 + t('s')}</Item>}
-                                            {180 < estimateDuration() && <Item key="180">{180 + t('s')}</Item>}
-                                            <Item key="0">{estimateDuration() + t('s') + ' ' + t('(original)')}</Item>
+                                            {hasDurationPreset(15) && <Item key="15">{15 + t('s')}</Item>}
+                                            {hasDurationPreset(30) && <Item key="30">{30 + t('s')}</Item>}
+                                            {hasDurationPreset(60) && <Item key="60">{60 + t('s')}</Item>}
+                                            {hasDurationPreset(180) && <Item key="180">{180 + t('s')}</Item>}
+                                            <Item key="0">{estimatedDuration + t('s') + ' ' + t('(original)')}</Item>
                                         </Picker>
                                     </Flex>
                                     <Flex justifyContent="center">
