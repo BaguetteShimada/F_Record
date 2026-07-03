@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import type { ConfigData } from './models';
 import { selectProcessImageFolder } from './settingsFolderActions';
 import { applyLanguageChange } from './settingsLanguageActions';
+import { applySettingsStringConfigChange } from './settingsConfigActions';
 import SettingsPickerRow from './SettingsPickerRow';
 import SettingsFolderSection from './SettingsFolderSection';
 
@@ -32,9 +33,7 @@ function SettingsPanel({configData, onConfigChange}: SettingsPanelProps) {
                     ariaLabel="Resolution"
                     selectedKey={configData.current.resolution}
                     onSelectionChange={(key) => {
-                        onConfigChange({
-                            resolution: String(key)
-                        });
+                        applySettingsStringConfigChange('resolution', key, onConfigChange);
                     }}
                 >
                     <Item key="360">360p</Item>
@@ -47,9 +46,7 @@ function SettingsPanel({configData, onConfigChange}: SettingsPanelProps) {
                     ariaLabel="Quality"
                     selectedKey={configData.current.quality}
                     onSelectionChange={(key) => {
-                        onConfigChange({
-                            quality: String(key)
-                        });
+                        applySettingsStringConfigChange('quality', key, onConfigChange);
                     }}
                     helpText={t('The higher the Quality you select, the lower the compression rate applied to the image.')}
                 >
@@ -62,9 +59,7 @@ function SettingsPanel({configData, onConfigChange}: SettingsPanelProps) {
                     ariaLabel="Idle Timeout"
                     selectedKey={configData.current.idleTimeout}
                     onSelectionChange={(key) => {
-                        onConfigChange({
-                            idleTimeout: String(key)
-                        });
+                        applySettingsStringConfigChange('idleTimeout', key, onConfigChange);
                     }}
                     helpText={t('When the time elapsed since the last painting exceeds the preset duration, the timer will automatically stop.')}
                 >
