@@ -1,10 +1,13 @@
-const path = require("path");
 const savePixmap = require("./savePixmap");
 const {
     hasDocumentValue,
     readDocumentValue,
     updateDocumentValue,
 } = require("./documentStore");
+const {
+    getCaptureImageFilePath,
+    getCaptureImageFolderPath,
+} = require("./captureFramePaths");
 const { createDefaultDocumentValue } = require("./models");
 const { getNextImageName, markImageSaved } = require("./recordingLogic");
 const { ensureDirectory } = require("./storage");
@@ -12,7 +15,7 @@ const { ensureDirectory } = require("./storage");
 async function saveCaptureFrame(options) {
     const mutex = options.mutex;
     const documentCreateTime = options.documentCreateTime;
-    const imageFolderPath = path.join(options.configData.processImageFolderPath, documentCreateTime);
+    const imageFolderPath = getCaptureImageFolderPath(options.configData.processImageFolderPath, documentCreateTime);
     const nowMsFactory = options.nowMsFactory || (() => new Date().getTime());
     const savePixmapFn = options.savePixmapFn || savePixmap;
 
@@ -26,7 +29,7 @@ async function saveCaptureFrame(options) {
 
         const documentValue = readDocumentValue(documentCreateTime, createDefaultDocumentValue());
         const imageName = getNextImageName(documentValue.count);
-        const imageFilePath = path.join(imageFolderPath, imageName);
+        const imageFilePath = getCaptureImageFilePath(options.configData.processImageFolderPath, documentCreateTime, imageName);
         await savePixmapFn(options.pixmap, imageFilePath, options.saveSettings);
 
         const nowMs = nowMsFactory();
