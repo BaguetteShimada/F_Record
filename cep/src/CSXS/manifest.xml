@@ -39,12 +39,12 @@
                             <Height>320</Height>
                         </Size>
                         <MaxSize>
-                            <Width>325</Width>
-                            <Height>320</Height>
+                            <Width>900</Width>
+                            <Height>900</Height>
                         </MaxSize>
                         <MinSize>
-                            <Width>325</Width>
-                            <Height>320</Height>
+                            <Width>280</Width>
+                            <Height>260</Height>
                         </MinSize>
                     </Geometry>
                 </UI>
