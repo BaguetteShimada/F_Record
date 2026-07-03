@@ -16,6 +16,7 @@ import {
 } from './exportSettingsActions';
 import ExportProgressBar from './ExportProgressBar';
 import ExportReplayDialog from './ExportReplayDialog';
+import { openExportedVideo } from './exportVideoActions';
 
 interface ExportReplayButtonProps {
     configData: React.MutableRefObject<ConfigData>;
@@ -63,13 +64,7 @@ function ExportReplayButton({
                 });
                 ToastQueue.positive(t('Export success'), {
                     actionLabel: t('Open'),
-                    onAction: () => {
-                        try {
-                            openLocalPath(savePath);
-                        } catch (error) {
-                            onError(error);
-                        }
-                    }
+                    onAction: () => openExportedVideo(savePath, onError)
                 });
             } catch (error) {
                 ToastQueue.negative(getExportFailureMessage(error), {
