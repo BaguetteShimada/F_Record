@@ -143,8 +143,7 @@ function resolveNodeCommand(options = {}) {
 }
 
 function findNodeInAncestors(startDir, executableName, fsImpl) {
-    let currentDir = path.resolve(startDir);
-    while (true) {
+    for (let currentDir = path.resolve(startDir); currentDir;) {
         const candidate = path.join(currentDir, executableName);
         if (isFile(candidate, fsImpl)) {
             return candidate;
@@ -156,6 +155,7 @@ function findNodeInAncestors(startDir, executableName, fsImpl) {
         }
         currentDir = parentDir;
     }
+    return null;
 }
 
 function readEnvPath(envNames, env) {
