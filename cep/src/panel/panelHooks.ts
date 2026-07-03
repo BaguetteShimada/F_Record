@@ -3,8 +3,8 @@ import { darkTheme, lightTheme } from '@adobe/react-spectrum';
 import type { ConfigData, CurrentDocumentValue, ExportSettings } from './models';
 import { loadConfigData, saveConfigData } from './configStore';
 import { clearNowDocument, loadCurrentDocumentValue } from './documentStore';
+import { startPanelPolling } from './polling';
 
-const pollIntervalMs = 500;
 const themeChangedEventName = 'com.adobe.csxs.events.ThemeColorChanged';
 
 type ErrorHandler = (error: unknown) => void;
@@ -53,9 +53,7 @@ export function useConfigSync(
             }
         };
 
-        saveCurrentConfig();
-        const intervalId = window.setInterval(saveCurrentConfig, pollIntervalMs);
-        return () => window.clearInterval(intervalId);
+        return startPanelPolling(saveCurrentConfig);
     }, [configData, onConfigLoadedRef, onErrorRef]);
 }
 
@@ -78,9 +76,7 @@ export function useCurrentDocumentSync(
             }
         };
 
-        updateCurrentDocument();
-        const intervalId = window.setInterval(updateCurrentDocument, pollIntervalMs);
-        return () => window.clearInterval(intervalId);
+        return startPanelPolling(updateCurrentDocument);
     }, [configData, setDocumentValue]);
 }
 
@@ -95,9 +91,7 @@ export function useExportTimeSync(
             }
         };
 
-        updateLastExportTime();
-        const intervalId = window.setInterval(updateLastExportTime, pollIntervalMs);
-        return () => window.clearInterval(intervalId);
+        return startPanelPolling(updateLastExportTime);
     }, [configData, exportSettings]);
 }
 
