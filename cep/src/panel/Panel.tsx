@@ -1,12 +1,24 @@
 import * as React from 'react';
-import { Button, defaultTheme, Flex, Item, Provider, Switch, TabList, TabPanels, Tabs, Text, lightTheme, darkTheme, FileTrigger, TextField, Picker, ActionButton, Heading, ButtonGroup, DialogTrigger, Dialog, Content, Divider, Header, ToastContainer, ToastQueue } from '@adobe/react-spectrum';
+import { Flex, Item, Provider, TabList, TabPanels, Tabs, Text, darkTheme, ToastContainer, ToastQueue } from '@adobe/react-spectrum';
 import Settings from '@spectrum-icons/workflow/Settings';
 import MovieCamera from '@spectrum-icons/workflow/MovieCamera';
-import path from 'path-browserify';
 import DashboardPanel from './DashboardPanel';
 import SettingsPanel from './SettingsPanel';
 import { useTranslation } from 'react-i18next';
-import { F_Record_Dir, configDataFilePath, nowDocumentFilePath, documentValueFolderPath } from './constants';
+import {
+    createDefaultConfigData,
+    createDefaultCurrentDocumentValue,
+    createDefaultExportProgress,
+    createDefaultExportSettings,
+} from './models';
+import type { ConfigData, CurrentDocumentValue, ExportProgress, ExportSettings } from './models';
+import {
+    useConfigSync,
+    useCurrentDocumentSync,
+    useExportTimeSync,
+    useHostThemeSync,
+    usePersistentPanel,
+} from './panelHooks';
 
 
 function Panel() {
@@ -16,192 +28,47 @@ function Panel() {
 
     const [theme, setTheme] = React.useState(darkTheme);
 
-    interface ConfigData {
-        [key: string]: any;
-    }
-    const configData = React.useRef<ConfigData>({
-        isEnabled: false,
-        processImageFolderPath: path.join(F_Record_Dir, "processImages"),
-        resolution: "1080",
-        quality: "70",
-        idleTimeout: "1",
-        language: "cn",
-        lastExportTime: null,
-    });
+    const configData = React.useRef<ConfigData>(createDefaultConfigData());
 
-    interface DocumentValue {
-        [key: string]: any;
-    }
-    const defaultDocumentValue: DocumentValue = {
-        id: null,
-        createTime: null,
-        name: null,
-        isGettingImage: null,
-        bounds: null,
-        count: null,
-        timeSpent: null,
-        lastModifiedTime: null,
-    }
-    const [documentValue, setDocumentValue] = React.useState<DocumentValue>(defaultDocumentValue);
+    const [documentValue, setDocumentValue] = React.useState<CurrentDocumentValue>(() => createDefaultCurrentDocumentValue());
 
-    const loadConfigData = () => {
-        //@ts-ignore
-        if (!isExist(F_Record_Dir)) {
-            //@ts-ignore
-            createDir(F_Record_Dir);
-        }
-        //@ts-ignore
-        if (isExist(configDataFilePath)) {
-            configData.current = {
-                ...configData.current,
-                //@ts-ignore
-                ...JSON.parse(readFile(configDataFilePath))
-            }
-        }
-        //@ts-ignore
-        const configDataFiles = readDir(F_Record_Dir);
-        for (const file of configDataFiles) {
-            if (file.startsWith('configData.json.')) {
-                //@ts-ignore
-                unlinkFile(path.join(F_Record_Dir, file));
-            }
-        }
-        i18n.changeLanguage(configData.current.language);
+    const exportSettings = React.useRef<ExportSettings>(createDefaultExportSettings());
+
+    const [progress, setProgress] = React.useState<ExportProgress>(() => createDefaultExportProgress());
+
+    const showPanelError = React.useCallback((error: unknown) => {
+        ToastQueue.negative(t('Error'), {
+            actionLabel: t('Details'),
+            onAction: () => showError(error)
+        });
+    }, [t]);
+
+    const handleConfigLoaded = React.useCallback((loadedConfigData: ConfigData) => {
+        i18n.changeLanguage(loadedConfigData.language);
         forceUpdate({});
-    }
+    }, [i18n]);
 
-
-    const saveConfigData = () => {
-        //@ts-ignore
-        if (!isExist(F_Record_Dir)) {
-            //@ts-ignore
-            createDir(F_Record_Dir);
-        }
-        //@ts-ignore
-        writeFile(configDataFilePath, JSON.stringify(configData.current, null, 2));
-    }
-    
-
-    const updateNowDocument = () => {
-        let nowDocumentValue = defaultDocumentValue;
-        //@ts-ignore
-        if (!isExist(nowDocumentFilePath)){
-            setDocumentValue(defaultDocumentValue);
-            return;
-        }
-        nowDocumentValue ={
-            ...nowDocumentValue,
-            //@ts-ignore
-            ...JSON.parse(readFile(nowDocumentFilePath))
-        }
-        const nowDocumentValueFilePath = path.join(documentValueFolderPath, `${nowDocumentValue.createTime}.json`);
-        //@ts-ignore
-        if (!isExist(nowDocumentValueFilePath)){
-            setDocumentValue(defaultDocumentValue);
-            return;
-        }
-        nowDocumentValue = {
-            ...nowDocumentValue,
-            //@ts-ignore
-            ...JSON.parse(readFile(nowDocumentValueFilePath))
-        }
-        if (nowDocumentValue.id) {
-            const imageFolderPath = path.join(configData.current.processImageFolderPath, nowDocumentValue.createTime);
-            //@ts-ignore
-            if (isExist(imageFolderPath)) {
-                //@ts-ignore
-                nowDocumentValue.count = readDir(imageFolderPath).length;
-            } else {
-                nowDocumentValue.count = 0;
-            }
-        }
-        setDocumentValue(nowDocumentValue);
-    }
-
-    const loopUpdateNowDocument = async () => {
-        //@ts-ignore
-        if (isExist(nowDocumentFilePath)) {
-            //@ts-ignore
-            unlinkFile(nowDocumentFilePath);
-        }
-        while (true) {
-            try {   
-                updateNowDocument();
-            } catch (error) {
-                //pass
-            }
-            await new Promise(resolve => setTimeout(resolve, 500));
-        }
-    }
-
-    const loopSaveConfigData = async () => {
-        while (true) {
-            try {
-                saveConfigData();
-            } catch (error) {
-                //pass
-            }
-            await new Promise(resolve => setTimeout(resolve, 500));
-        }
-    }
-
-
-    const exportSettings = React.useRef({
-        isExporting: false,
-        aspectRatio: "0",
-        duration: "0",
-        savePath: null,
-    });
-
-    const [progress, setProgress] = React.useState({
-        status: "",
-        percent: 0,
-    });
-
-    const loopUpdateLastExportTime = async () => {
-        while (true) {
-            if (exportSettings.current.isExporting) {
-                configData.current.lastExportTime = new Date().getTime();
-            }
-            await new Promise(resolve => setTimeout(resolve, 500));
-        }
-    }
-
-    const syncTheme = () => {
-        //@ts-ignore
-        const hostEnv = cs.getHostEnvironment();
-        const bgColor = hostEnv.appSkinInfo.appBarBackgroundColor;
-        if (bgColor.color.red < 127) {
-            setTheme(darkTheme);
-        } else {
-            setTheme(lightTheme);
-        }
-    }
-
-    const alwaysSyncTheme = () => {
-        //@ts-ignore
-        syncTheme();
-        //@ts-ignore
-        cs.addEventListener('com.adobe.csxs.events.ThemeColorChanged', syncTheme);
-    }
-
-    React.useEffect(() => {
-        try {
-            //@ts-ignore
-            persistentPanel();
-            loadConfigData();
-            loopSaveConfigData();
-            loopUpdateNowDocument();
-            loopUpdateLastExportTime();
-            alwaysSyncTheme();
-        } catch (error) {
-            ToastQueue.negative(t('Error'), {
-                actionLabel: t('Details'),
-                //@ts-ignore
-                onAction: () => showError(error)
-            });
-        }
+    const handleConfigChange = React.useCallback((configChange: Partial<ConfigData>) => {
+        configData.current = {
+            ...configData.current,
+            ...configChange,
+        };
+        forceUpdate({});
     }, []);
+
+    const handleExportSettingsChange = React.useCallback((exportSettingsChange: Partial<ExportSettings>) => {
+        exportSettings.current = {
+            ...exportSettings.current,
+            ...exportSettingsChange,
+        };
+        forceUpdate({});
+    }, []);
+
+    usePersistentPanel(showPanelError);
+    useConfigSync(configData, handleConfigLoaded, showPanelError);
+    useCurrentDocumentSync(configData, setDocumentValue);
+    useExportTimeSync(configData, exportSettings);
+    useHostThemeSync(setTheme, showPanelError);
 
     return (
         <Provider theme={theme}>
@@ -220,10 +87,10 @@ function Panel() {
                     </TabList>
                     <TabPanels>
                         <Item key="Dashboard Panel">
-                            <DashboardPanel configData={configData} documentValue={documentValue} exportSettings={exportSettings} progress={progress} setProgress={setProgress}/>
+                            <DashboardPanel configData={configData} documentValue={documentValue} exportSettings={exportSettings} progress={progress} setProgress={setProgress} onConfigChange={handleConfigChange} onExportSettingsChange={handleExportSettingsChange}/>
                         </Item>
                         <Item key="Settings Panel">
-                            <SettingsPanel configData={configData} documentValue={documentValue}/>
+                            <SettingsPanel configData={configData} onConfigChange={handleConfigChange}/>
                         </Item>
                     </TabPanels>
                 </Tabs>
@@ -232,4 +99,4 @@ function Panel() {
     );
 };
 
-export default Panel; 
+export default Panel;

@@ -1,0 +1,16 @@
+{
+  "compilerOptions": {
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "jsx": "react",
+    "lib": ["DOM", "DOM.Iterable", "ES2015"],
+    "module": "ESNext",
+    "moduleResolution": "node",
+    "noImplicitAny": true,
+    "resolveJsonModule": true,
+    "skipLibCheck": true,
+    "target": "ES5"
+  },
+  "include": ["src/**/*.ts", "src/**/*.tsx"]
+}

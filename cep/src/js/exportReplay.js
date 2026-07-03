@@ -1,11 +1,15 @@
 const fs = require("fs");
 const path = require('path');
 const ffmpeg = require('fluent-ffmpeg');
-
-const ffmpegPath = path.resolve(__dirname, '..', 'ffmpeg', process.platform === 'win32' ? 'ffmpeg.exe' : 'ffmpeg');
-const ffprobePath = path.resolve(__dirname, '..', 'ffmpeg', process.platform === 'win32' ? 'ffprobe.exe' : 'ffprobe');
-ffmpeg.setFfmpegPath(ffmpegPath);
-ffmpeg.setFfprobePath(ffprobePath);
+const {
+    calculateExportProgress,
+    calculateExportVideoSize,
+    copyValidReplayImages,
+    createExportError,
+    listReplayImageFiles,
+    resolveExportBinaries,
+    serializeError,
+} = require('./exportReplayUtils');
 
 const FPS = 25;
 
@@ -20,7 +24,7 @@ process.on('message', (exportParams) => {
         .catch(error => {
             process.send({
                 type: "exportReplayError",
-                data: error
+                data: serializeError(error)
             });
         });
 })
@@ -45,15 +49,16 @@ const statusInfo = [
 ]
 
 async function _exportReplay(exportParams) {
+    const exportBinaries = resolveExportBinaries();
+    ffmpeg.setFfmpegPath(exportBinaries.ffmpeg);
+    ffmpeg.setFfprobePath(exportBinaries.ffprobe);
+
     const { configData, documentValue, exportSettings, exportTempFolderPath } = exportParams;
     const imageFolderPath = path.join(configData.processImageFolderPath, documentValue.createTime);
-    const files = fs.readdirSync(imageFolderPath);
-    const imageFiles = files
-        .filter(file => /\.(jpg|jpeg|JPG|JPEG)$/i.test(file))
-        .sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
+    const imageFiles = listReplayImageFiles(imageFolderPath);
 
     if (imageFiles.length === 0) {  
-        throw new Error('No image files found');
+        throw createExportError("EXPORT_IMAGE_FILES_EMPTY", 'No image files found');
     }
 
 
@@ -62,65 +67,29 @@ async function _exportReplay(exportParams) {
     const postNowProgress = (index, percent, force = false) => {
         const now = Date.now();
         if (now - lastProgressTime >= 2000 || force) {
-            percent = Math.min(percent, 1);
-            percent = Math.max(percent, 0);
-            let nowPercent = 0;
-            for (let i = 0; i < index; i++) {
-                nowPercent += statusInfo[i].ratio;
-            }
-            nowPercent += statusInfo[index].ratio * percent;
             process.send({
                 type: "exportReplayProgress", 
-                data: {
-                    status: statusInfo[index].status,
-                    percent: Math.ceil(nowPercent * 100)
-                }
+                data: calculateExportProgress(statusInfo, index, percent)
             });
             lastProgressTime = now;
         }
     }
 
-    const checkJPGIntegrity = (filePath) => {
-        try {
-            const buffer = fs.readFileSync(filePath);
-            if (buffer[0] !== 0xFF || buffer[1] !== 0xD8) {
-                return false;
-            }
-            if (buffer[buffer.length - 2] !== 0xFF || buffer[buffer.length - 1] !== 0xD9) {
-                return false;
-            }
-            return true;
-        } catch (error) {
-            return false;
-        }
-    }
-
     postNowProgress(0, 0, true)
-    
-    for (let i = 0; i < imageFiles.length; i++) {
-        const file = imageFiles[i];
-        postNowProgress(0, i / imageFiles.length);
-        const newName = `${(i + 1).toString().padStart(6, '0')}.jpg`;
-        const src = path.join(imageFolderPath, file);
-        const dest = path.join(exportTempFolderPath, newName);
-        if (checkJPGIntegrity(src)) {
-            fs.copyFileSync(src, dest);
-        }
+
+    const copiedImageCount = copyValidReplayImages(imageFolderPath, imageFiles, exportTempFolderPath, {
+        onFile: (_file, index) => {
+            postNowProgress(0, index / imageFiles.length);
+        },
+    });
+    postNowProgress(0, 1, true);
+    if (copiedImageCount === 0) {
+        throw createExportError("EXPORT_VALID_IMAGE_FILES_EMPTY", 'No valid image files found');
     }
 
     postNowProgress(1, 0, true)
 
-    const { width, height } = (function() {
-        let aspectRatio = parseFloat(exportSettings.aspectRatio);
-        if (aspectRatio === 0.0) {
-            aspectRatio = (documentValue.bounds.right - documentValue.bounds.left) / (documentValue.bounds.bottom - documentValue.bounds.top);
-        }
-        let height = parseFloat(configData.resolution) * Math.sqrt(16 / 9 / aspectRatio);
-        let width = height * aspectRatio;
-        height = Math.max(Math.round(height / 2), 1) * 2;
-        width = Math.max(Math.round(width / 2), 1) * 2;
-        return { width, height };
-    })();
+    const { width, height } = calculateExportVideoSize(configData, documentValue, exportSettings);
 
     await new Promise((resolve, reject) => {
         const input = `${path.join(exportTempFolderPath, '%06d.jpg').replace(/\\/g, '/')}`;
@@ -133,7 +102,7 @@ async function _exportReplay(exportParams) {
                             .videoCodec('libx264')
         if (exportSettings.duration !== "0") {
             const duration = parseFloat(exportSettings.duration);
-            let k = (duration - 3) / (imageFiles.length / FPS);
+            let k = (duration - 3) / (copiedImageCount / FPS);
             k = Math.round(Math.min(Math.max(k, 0.001), 1) * 1000) / 1000;
             baseFfmpeg = baseFfmpeg.videoFilters('setpts=' + k + '*PTS');
         }

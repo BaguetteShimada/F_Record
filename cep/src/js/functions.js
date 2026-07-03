@@ -1,7 +1,9 @@
 const fs = require("fs");
 const path = require('path');
 const writeFileAtomic = require('write-file-atomic');
-const { exec , spawn } = require('child_process');
+const { exec } = require('child_process');
+const { runExportReplayWorker } = require(path.join(__dirname, 'js', 'exportReplayWorker.js'));
+const { resolveExportBinaries } = require(path.join(__dirname, 'js', 'exportReplayUtils.js'));
 const cs = new CSInterface();
 
 
@@ -72,35 +74,12 @@ function persistentPanel() {
     cs.dispatchEvent(event);
 }
 
-async function exportReplay(exportParams, onProgress) {
-    return new Promise((resolve, reject) => {
-        const workerPath = path.join(__dirname, 'js', 'exportReplay.js');
-        const worker = spawn('node', [workerPath], {
-            stdio: ['pipe', 'pipe', 'pipe', 'ipc']
-        });
+function validateExportBinaries() {
+    resolveExportBinaries();
+}
 
-        worker.on('message', (message) => {
-            const { type, data } = message;
-            switch (type) {
-            case "exportReplayProgress":
-                onProgress(data);
-                break;
-            case "exportReplaySuccess":
-                resolve();
-                break;
-            case "exportReplayError":
-                reject(data);
-                break;
-            }
-        });
-        worker.on('error', (error) => {
-            reject(error);
-        });
-        worker.on('exit', (code) => {
-            if (code !== 0) {
-                reject(new Error(`Worker exited with code ${code}`));
-            }
-        });
-        worker.send(exportParams);
+async function exportReplay(exportParams, onProgress) {
+    return runExportReplayWorker(exportParams, onProgress, {
+        workerPath: path.join(__dirname, 'js', 'exportReplay.js'),
     });
 }

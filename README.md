@@ -16,9 +16,12 @@ https://github.com/user-attachments/assets/0221cee9-ac70-48d1-b85a-b85667813b90
 
 ## 安装方法
 
-1. 下载插件压缩包[F_Record.zip](https://github.com/F-know/F_Record/releases/download/3.0/F_Record.zip)，解压，打开文件夹。
+1. 安装 ffmpeg，并确认系统环境中可以直接运行 `ffmpeg` 和 `ffprobe`。
+   推荐将 ffmpeg 的 `bin` 目录加入 Windows 的 `PATH`。如果不想改 PATH，也可以分别设置环境变量 `F_RECORD_FFMPEG_PATH` 和 `F_RECORD_FFPROBE_PATH`，指向 `ffmpeg.exe` 和 `ffprobe.exe` 的完整路径。
 
-2. 将内部的两个文件夹`com.f_know.f_record.cep`和`com.f_know.f_record.generator`放到PS主目录下的相应位置。
+2. 下载插件压缩包[F_Record.zip](https://github.com/F-know/F_Record/releases/download/3.0/F_Record.zip)，解压，打开文件夹。
+
+3. 将内部的两个文件夹`com.f_know.f_record.cep`和`com.f_know.f_record.generator`放到PS主目录下的相应位置。
    PS主目录的路径形如`D:\Adobe Photoshop 2022`。
    判断有没有找对是看其中有没有PS的可执行文件`Photoshop.exe`，而不是快捷方式。
 
@@ -28,10 +31,10 @@ https://github.com/user-attachments/assets/0221cee9-ac70-48d1-b85a-b85667813b90
 
     注意，有可能你的PS下缺少某个路径，比如Plug-ins下没有Generator文件夹，这时需要你手动创建一个。
 
-3. 打开PS，依次点开"编辑-首选项-增效工具"，看看"启用生成器"和"载入扩展面板"是否勾选。
+4. 打开PS，依次点开"编辑-首选项-增效工具"，看看"启用生成器"和"载入扩展面板"是否勾选。
    如果没有勾选，则需要勾上后重启PS，如果已经勾选，则不需要重启。
 
-4. 最后，在PS的"窗口-扩展（旧版）"中就能找到插件，点开后即可正常使用。
+5. 最后，在PS的"窗口-扩展（旧版）"中就能找到插件，点开后即可正常使用。
 
 ## 使用说明
 
