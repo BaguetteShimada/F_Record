@@ -68,13 +68,18 @@
    pnpm run build
    ```
 
-5. 在 GitHub 创建 Release：
+5. 如需在本机 Photoshop 中做最终安装验证，用管理员 PowerShell 运行：
+   ```powershell
+   .\scripts\installPhotoshopPlugin.ps1 -PhotoshopRoot "C:\Program Files\Adobe\Adobe Photoshop 2022"
+   ```
+
+6. 在 GitHub 创建 Release：
    - 仓库：`https://github.com/BaguetteShimada/F_Record`
    - Tag：`3.1.0`
    - Title：`F_Record 3.1.0`
    - Asset：上传 `dist/F_Record.zip`
 
-6. Release notes 至少说明：
+7. Release notes 至少说明：
    - 重构 CEP 面板和 Generator 录制核心。
    - 增加类型模型、存储层、错误处理和测试。
    - 导出改为使用系统 `ffmpeg/ffprobe`。
