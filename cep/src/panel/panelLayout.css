@@ -94,6 +94,8 @@ body {
 .fr-row-label .spectrum-Icon,
 .fr-document-folder-button svg,
 .fr-document-folder-button .spectrum-Icon,
+.fr-github-button svg,
+.fr-github-button .spectrum-Icon,
 .fr-export-button svg,
 .fr-export-button .spectrum-Icon {
   flex: 0 0 18px;
@@ -278,6 +280,18 @@ body {
   gap: 16px;
   justify-content: flex-end;
   margin-bottom: 32px;
+}
+
+.fr-github-button {
+  flex: 0 0 auto;
+  width: 32px;
+  min-width: 32px;
+  height: 32px;
+  padding: 0;
+}
+
+.fr-github-button svg {
+  display: block;
 }
 
 .fr-export-progress {
