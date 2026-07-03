@@ -100,6 +100,17 @@
   margin-bottom: 32px;
 }
 
+.fr-export-button svg,
+.fr-export-button .spectrum-Icon {
+  flex: 0 0 18px;
+  width: 18px !important;
+  min-width: 18px;
+  max-width: 18px;
+  height: 18px !important;
+  min-height: 18px;
+  max-height: 18px;
+}
+
 .fr-export-progress {
   min-width: 128px;
   width: min(220px, 100%);
