@@ -3,7 +3,7 @@ import { ActionButton, ProgressCircle, Switch, TooltipTrigger, Tooltip, Link } f
 import { TextField } from "@adobe/react-spectrum";
 import { Text } from "@adobe/react-spectrum";
 import ExportReplayButton from "./ExportReplayButton";
-import OpenIn from '@spectrum-icons/workflow/OpenIn';
+import FolderOpen from '@spectrum-icons/workflow/FolderOpen';
 import Clock from '@spectrum-icons/workflow/Clock';
 import Images from '@spectrum-icons/workflow/Images';
 import DocumentOutline from '@spectrum-icons/workflow/DocumentOutline';
@@ -76,7 +76,12 @@ function DashboardPanel({
                         <DocumentOutline size="S" />
                         <Text>{t('Document')}</Text>
                     </div>
-                    <div className="fr-row-value">
+                    <div className="fr-row-value fr-document-value">
+                        <TextField
+                            width="100%"
+                            value={documentValue.id ? documentValue.name || "" : ""}
+                            isReadOnly
+                        />
                         {documentValue.id && (
                             <TooltipTrigger delay={0}>
                                 <ActionButton
@@ -89,18 +94,13 @@ function DashboardPanel({
                                         }
                                     }}
                                     isDisabled={!documentValue.count}
-                                    UNSAFE_className="fr-process-folder-button"
+                                    UNSAFE_className="fr-document-folder-button"
                                     >
-                                    <OpenIn />
+                                    <FolderOpen />
                                 </ActionButton>
                                 <Tooltip>{t('Open Process Image Folder')}</Tooltip>
                             </TooltipTrigger>
                         )}
-                        <TextField
-                            width="100%"
-                            value={documentValue.id ? documentValue.name || "" : ""}
-                            isReadOnly
-                        />
                     </div>
                 </div>
                 <div className="fr-data-row">
