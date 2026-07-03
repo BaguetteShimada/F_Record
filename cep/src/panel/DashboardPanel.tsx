@@ -16,6 +16,7 @@ import {
     getTimeSpentDisplayValue,
 } from './dashboardValues';
 import { getProcessImageFolderPath } from './documentPaths';
+import RecordToggleButton from './RecordToggleButton';
 
 function GitHubIcon() {
     return (
@@ -59,25 +60,16 @@ function DashboardPanel({
     return(
         <div className="fr-dashboard">
             <div className="fr-dashboard-toolbar">
-                <button
-                    type="button"
-                    role="switch"
-                    aria-checked={configData.current.isEnabled}
-                    aria-label="Toggle Enabled"
-                    className="fr-record-switch"
-                    onClick={() => {
+                <RecordToggleButton
+                    isEnabled={configData.current.isEnabled}
+                    enabledLabel={t('Enabled')}
+                    disabledLabel={t('Disabled')}
+                    onToggle={() => {
                         onConfigChange({
                             isEnabled: !configData.current.isEnabled
                         });
                     }}
-                >
-                    <span className="fr-record-switch-track" aria-hidden="true">
-                        <span className="fr-record-switch-thumb" />
-                    </span>
-                    <span className="fr-record-switch-label">
-                        {configData.current.isEnabled ? t('Enabled') : t('Disabled')}
-                    </span>
-                </button>
+                />
                 <ExportReplayButton configData={configData} documentValue={documentValue} exportSettings={exportSettings} progress={progress} setProgress={setProgress} onExportSettingsChange={onExportSettingsChange} onError={onError}/>
             </div>
             <div className="fr-dashboard-section">
