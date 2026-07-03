@@ -28,8 +28,29 @@
   max-width: 100%;
 }
 
+.fr-tabs [role="tablist"] {
+  min-height: 36px;
+}
+
+.fr-tabs [role="tab"] {
+  display: inline-flex;
+  align-items: center;
+  min-width: 0;
+}
+
 .fr-tab-label {
   white-space: nowrap;
+}
+
+.fr-panel-shell svg,
+.fr-panel-shell .spectrum-Icon {
+  flex: 0 0 18px;
+  width: 18px !important;
+  min-width: 18px;
+  max-width: 18px;
+  height: 18px !important;
+  min-height: 18px;
+  max-height: 18px;
 }
 
 .fr-dashboard {
@@ -70,7 +91,8 @@
   white-space: nowrap;
 }
 
-.fr-row-label svg {
+.fr-row-label svg,
+.fr-row-label .spectrum-Icon {
   flex: 0 0 auto;
   margin-right: 8px;
 }
@@ -98,17 +120,6 @@
   display: flex;
   justify-content: flex-end;
   margin-bottom: 32px;
-}
-
-.fr-export-button svg,
-.fr-export-button .spectrum-Icon {
-  flex: 0 0 18px;
-  width: 18px !important;
-  min-width: 18px;
-  max-width: 18px;
-  height: 18px !important;
-  min-height: 18px;
-  max-height: 18px;
 }
 
 .fr-export-progress {
@@ -188,11 +199,5 @@
 
   .fr-settings-row > :last-child {
     justify-self: stretch;
-  }
-}
-
-@media (max-width: 520px) {
-  .fr-tab-label {
-    display: none;
   }
 }
