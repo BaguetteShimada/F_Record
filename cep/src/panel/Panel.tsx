@@ -87,7 +87,7 @@ function Panel() {
                     </TabList>
                     <TabPanels>
                         <Item key="Dashboard Panel">
-                            <DashboardPanel configData={configData} documentValue={documentValue} exportSettings={exportSettings} progress={progress} setProgress={setProgress} onConfigChange={handleConfigChange} onExportSettingsChange={handleExportSettingsChange}/>
+                            <DashboardPanel configData={configData} documentValue={documentValue} exportSettings={exportSettings} progress={progress} setProgress={setProgress} onConfigChange={handleConfigChange} onExportSettingsChange={handleExportSettingsChange} onError={showPanelError}/>
                         </Item>
                         <Item key="Settings Panel">
                             <SettingsPanel configData={configData} onConfigChange={handleConfigChange}/>
