@@ -7,6 +7,7 @@ import type { ConfigData, CurrentDocumentValue, ExportProgress, ExportSettings }
 import { estimateReplayDurationSeconds, getReplayDurationPresetSeconds } from './exportDurationOptions';
 import { prepareExportReplayParams, runPreparedExportReplay } from './exportReplayService';
 import { getExportFailureMessageDescriptor } from './exportErrors';
+import { selectExportSavePath } from './exportSaveDialog';
 
 interface ExportReplayButtonProps {
     configData: React.MutableRefObject<ConfigData>;
@@ -39,15 +40,15 @@ function ExportReplayButton({
     };
 
     const clickConfirm = async (close: () => void) => {
-        const result = window.cep.fs.showSaveDialogEx(t("Select Export Path"), "", ["mp4"], `${documentValue.name || ""}.mp4`, "MP4 (*.mp4)");
-        if (result.err === 0 && result.data !== "") {
+        const savePath = selectExportSavePath(documentValue.name, t("Select Export Path"));
+        if (savePath !== null) {
             const nextExportSettings = {
                 ...exportSettings.current,
-                savePath: result.data,
+                savePath: savePath,
                 isExporting: true,
             };
             onExportSettingsChange({
-                savePath: result.data,
+                savePath: savePath,
                 isExporting: true,
             });
             close();
@@ -68,7 +69,7 @@ function ExportReplayButton({
                     actionLabel: t('Open'),
                     onAction: () => {
                         try {
-                            openLocalPath(result.data);
+                            openLocalPath(savePath);
                         } catch (error) {
                             onError(error);
                         }
