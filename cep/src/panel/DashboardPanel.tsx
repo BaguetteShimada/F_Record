@@ -55,7 +55,7 @@ function DashboardPanel({
         try {
             window.cep.util.openURLInDefaultBrowser(url);
         } catch (error) {
-            //pass
+            onError(error);
         }
     };
     
