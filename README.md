@@ -4,6 +4,8 @@
 
 一款用来录制绘画过程的轻量级PS插件。
 
+**GitHub**: https://github.com/BaguetteShimada/F_Record
+
 https://github.com/user-attachments/assets/0221cee9-ac70-48d1-b85a-b85667813b90
 
 **插件原理**：调用PS生成器的接口，当画布发生变化时截取过程图片，最后将图片连起来生成录像。
@@ -23,7 +25,7 @@ https://github.com/user-attachments/assets/0221cee9-ac70-48d1-b85a-b85667813b90
 1. 安装 ffmpeg，并确认系统环境中可以直接运行 `ffmpeg` 和 `ffprobe`。
    推荐将 ffmpeg 的 `bin` 目录加入 Windows 的 `PATH`。如果不想改 PATH，也可以分别设置环境变量 `F_RECORD_FFMPEG_PATH` 和 `F_RECORD_FFPROBE_PATH`，指向 `ffmpeg.exe` 和 `ffprobe.exe` 的完整路径。
 
-2. 下载插件压缩包[F_Record.zip](https://github.com/F-know/F_Record/releases/download/3.0/F_Record.zip)，解压，打开文件夹。
+2. 下载插件压缩包[F_Record.zip](https://github.com/BaguetteShimada/F_Record/releases/download/3.0/F_Record.zip)，解压，打开文件夹。
 
 3. 将内部的两个文件夹`com.f_know.f_record.cep`和`com.f_know.f_record.generator`放到PS主目录下的相应位置。
    PS主目录的路径形如`D:\Adobe Photoshop 2022`。

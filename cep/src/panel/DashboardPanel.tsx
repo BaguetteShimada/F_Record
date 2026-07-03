@@ -31,6 +31,14 @@ function DashboardPanel({
     onExportSettingsChange,
 }: DashboardPanelProps) {
     const { t } = useTranslation();
+
+    const openExternalLink = (url: string) => {
+        try {
+            window.cep.util.openURLInDefaultBrowser(url);
+        } catch (error) {
+            //pass
+        }
+    };
     
     const formatTime = () => {
         const timeSpent = documentValue.timeSpent ?? 0;
@@ -131,14 +139,10 @@ function DashboardPanel({
                     </div>
                 </div>
             </div>
-            <div className="fr-github-row">
+            <div className="fr-community-links">
                 <Link 
                     onPress={() => {
-                        try {
-                            window.cep.util.openURLInDefaultBrowser("https://github.com/F-know/F_Record")
-                        } catch (error) {
-                            //pass
-                        }
+                        openExternalLink("https://github.com/BaguetteShimada/F_Record");
                     }}>
                         GitHub
                 </Link>
