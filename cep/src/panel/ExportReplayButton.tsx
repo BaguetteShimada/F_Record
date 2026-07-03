@@ -13,6 +13,7 @@ import { openExportedVideo } from './exportVideoActions';
 import { showExportFailureToast, showExportStartedToast, showExportSuccessToast } from './exportNotifications';
 import { runExportReplayFlow } from './exportReplayFlow';
 import { createExportReplayStart } from './exportStartActions';
+import { isExportReplayDisabled } from './exportAvailability';
 
 interface ExportReplayButtonProps {
     configData: React.MutableRefObject<ConfigData>;
@@ -66,7 +67,7 @@ function ExportReplayButton({
                 <DialogTrigger isDismissable>
                     <Button 
                         variant="accent" 
-                        isDisabled={!documentValue.id || !documentValue.count}
+                        isDisabled={isExportReplayDisabled(documentValue)}
                         UNSAFE_className="fr-export-button"
                     >
                         <Replay size="S" />
