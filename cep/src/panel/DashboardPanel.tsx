@@ -1,5 +1,4 @@
 import * as React from 'react';
-import ExportReplayButton from "./ExportReplayButton";
 import Clock from '@spectrum-icons/workflow/Clock';
 import Images from '@spectrum-icons/workflow/Images';
 import { useTranslation } from 'react-i18next';
@@ -9,11 +8,11 @@ import {
     getImageCountDisplayValue,
     getTimeSpentDisplayValue,
 } from './dashboardValues';
-import RecordToggleButton from './RecordToggleButton';
 import { openCurrentDocumentProcessImageFolder } from './documentFolderActions';
 import DashboardTextRow from './DashboardTextRow';
 import DashboardDocumentRow from './DashboardDocumentRow';
 import GitHubLinkButton from './GitHubLinkButton';
+import DashboardToolbar from './DashboardToolbar';
 
 interface DashboardPanelProps {
     configData: React.MutableRefObject<ConfigData>;
@@ -40,19 +39,16 @@ function DashboardPanel({
 
     return(
         <div className="fr-dashboard">
-            <div className="fr-dashboard-toolbar">
-                <RecordToggleButton
-                    isEnabled={configData.current.isEnabled}
-                    enabledLabel={t('Enabled')}
-                    disabledLabel={t('Disabled')}
-                    onToggle={() => {
-                        onConfigChange({
-                            isEnabled: !configData.current.isEnabled
-                        });
-                    }}
-                />
-                <ExportReplayButton configData={configData} documentValue={documentValue} exportSettings={exportSettings} progress={progress} setProgress={setProgress} onExportSettingsChange={onExportSettingsChange} onError={onError}/>
-            </div>
+            <DashboardToolbar
+                configData={configData}
+                documentValue={documentValue}
+                exportSettings={exportSettings}
+                progress={progress}
+                setProgress={setProgress}
+                onConfigChange={onConfigChange}
+                onExportSettingsChange={onExportSettingsChange}
+                onError={onError}
+            />
             <div className="fr-dashboard-section">
                 <DashboardDocumentRow
                     label={t('Document')}
