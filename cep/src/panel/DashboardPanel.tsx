@@ -81,7 +81,7 @@ function DashboardPanel({
                         {configData.current.isEnabled ? t('Enabled') : t('Disabled')}
                     </span>
                 </button>
-                <ExportReplayButton configData={configData} documentValue={documentValue} exportSettings={exportSettings} progress={progress} setProgress={setProgress} onExportSettingsChange={onExportSettingsChange}/>
+                <ExportReplayButton configData={configData} documentValue={documentValue} exportSettings={exportSettings} progress={progress} setProgress={setProgress} onExportSettingsChange={onExportSettingsChange} onError={onError}/>
             </div>
             <div className="fr-dashboard-section">
                 <div className="fr-data-row">

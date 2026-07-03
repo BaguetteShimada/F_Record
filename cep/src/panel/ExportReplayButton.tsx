@@ -1,13 +1,6 @@
-import { Item, Picker, ProgressBar } from '@adobe/react-spectrum';
-import { Flex } from '@adobe/react-spectrum';
-import { Content } from '@adobe/react-spectrum';
-import { Dialog } from '@adobe/react-spectrum';
-import { Button } from '@adobe/react-spectrum';
-import { DialogTrigger } from '@adobe/react-spectrum';
-import {ToastQueue} from '@adobe/react-spectrum'
 import * as React from 'react';
+import { Button, Content, Dialog, DialogTrigger, Flex, Item, Picker, ProgressBar, Text, ToastQueue } from '@adobe/react-spectrum';
 import Replay from '@spectrum-icons/workflow/Replay';
-import { Text } from '@adobe/react-spectrum';
 import { useTranslation } from 'react-i18next';
 import { FPS } from './constants';
 import type { ConfigData, CurrentDocumentValue, ExportProgress, ExportSettings } from './models';
@@ -22,6 +15,7 @@ interface ExportReplayButtonProps {
     progress: ExportProgress;
     setProgress: React.Dispatch<React.SetStateAction<ExportProgress>>;
     onExportSettingsChange: (exportSettingsChange: Partial<ExportSettings>) => void;
+    onError: (error: unknown) => void;
 }
 
 function ExportReplayButton({
@@ -31,6 +25,7 @@ function ExportReplayButton({
     progress,
     setProgress,
     onExportSettingsChange,
+    onError,
 }: ExportReplayButtonProps) {
     const { t } = useTranslation();
 
@@ -41,7 +36,7 @@ function ExportReplayButton({
     const getExportFailureMessage = (error: unknown): string => {
         const message = getExportFailureMessageDescriptor(error);
         return t(message.key, message.values);
-    }
+    };
 
     const clickConfirm = async (close: () => void) => {
         const result = window.cep.fs.showSaveDialogEx(t("Select Export Path"), "", ["mp4"], `${documentValue.name || ""}.mp4`, "MP4 (*.mp4)");
@@ -75,10 +70,7 @@ function ExportReplayButton({
                         try {
                             openLocalPath(result.data);
                         } catch (error) {
-                            ToastQueue.negative(t('Error'), {
-                                actionLabel: t('Details'),
-                                onAction: () => showError(error)
-                            });
+                            onError(error);
                         }
                     }
                 });
@@ -93,7 +85,7 @@ function ExportReplayButton({
                 });
             }
         }
-    }
+    };
 
     return (
         <>
