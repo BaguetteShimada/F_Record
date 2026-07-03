@@ -36,6 +36,7 @@ interface DashboardPanelProps {
     setProgress: React.Dispatch<React.SetStateAction<ExportProgress>>;
     onConfigChange: (configChange: Partial<ConfigData>) => void;
     onExportSettingsChange: (exportSettingsChange: Partial<ExportSettings>) => void;
+    onError: (error: unknown) => void;
 }
 
 function DashboardPanel({
@@ -46,6 +47,7 @@ function DashboardPanel({
     setProgress,
     onConfigChange,
     onExportSettingsChange,
+    onError,
 }: DashboardPanelProps) {
     const { t } = useTranslation();
 
@@ -101,7 +103,7 @@ function DashboardPanel({
                                         try {
                                             openLocalPath(path.join(configData.current.processImageFolderPath, documentValue.createTime || ""));
                                         } catch (error) {
-                                            alert(error);
+                                            onError(error);
                                         }
                                     }}
                                     isDisabled={!documentValue.count}
