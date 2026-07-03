@@ -14,6 +14,8 @@ https://github.com/user-attachments/assets/0221cee9-ac70-48d1-b85a-b85667813b90
 
 **支持PS版本**：PS 2022 ~ 2025
 
+**手动验证清单**：[docs/manual-validation.md](./docs/manual-validation.md)
+
 ## 安装方法
 
 1. 安装 ffmpeg，并确认系统环境中可以直接运行 `ffmpeg` 和 `ffprobe`。
