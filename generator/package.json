@@ -10,7 +10,8 @@
     "write-file-atomic": "^3.0.3"
   },
   "scripts": {
-    "build": "webpack --mode production"
+    "build": "webpack --mode production",
+    "test": "node test/recordingLogic.test.js && node test/recordingEventService.test.js && node test/pixmapSettings.test.js && node test/pixmapService.test.js && node test/captureService.test.js && node test/timeSpentService.test.js && node test/documentStore.test.js && node test/captureGate.test.js && node test/pollingTask.test.js && node test/runtimePollingService.test.js && node test/documentState.test.js && node test/documentSyncService.test.js && node test/logger.test.js && node test/runtime.test.js"
   },
   "devDependencies": {
     "clean-webpack-plugin": "^4.0.0",

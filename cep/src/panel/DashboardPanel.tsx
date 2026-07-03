@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { ActionButton, ProgressCircle, Switch, TooltipTrigger, Tooltip, Link, TextArea } from "@adobe/react-spectrum";
+import { ActionButton, ProgressCircle, Switch, TooltipTrigger, Tooltip, Link } from "@adobe/react-spectrum";
 import { TextField } from "@adobe/react-spectrum";
 import { Flex } from "@adobe/react-spectrum";
 import { Text } from "@adobe/react-spectrum";
@@ -10,16 +10,34 @@ import Images from '@spectrum-icons/workflow/Images';
 import DocumentOutline from '@spectrum-icons/workflow/DocumentOutline';
 import { useTranslation } from 'react-i18next';
 import path from 'path-browserify';
+import type { ConfigData, CurrentDocumentValue, ExportProgress, ExportSettings } from './models';
 
+interface DashboardPanelProps {
+    configData: React.MutableRefObject<ConfigData>;
+    documentValue: CurrentDocumentValue;
+    exportSettings: React.MutableRefObject<ExportSettings>;
+    progress: ExportProgress;
+    setProgress: React.Dispatch<React.SetStateAction<ExportProgress>>;
+    onConfigChange: (configChange: Partial<ConfigData>) => void;
+    onExportSettingsChange: (exportSettingsChange: Partial<ExportSettings>) => void;
+}
 
-function DashboardPanel({configData, documentValue, exportSettings, progress, setProgress}) {
-    const { t , i18n } = useTranslation();
-    const [, forceUpdate] = React.useState({});
+function DashboardPanel({
+    configData,
+    documentValue,
+    exportSettings,
+    progress,
+    setProgress,
+    onConfigChange,
+    onExportSettingsChange,
+}: DashboardPanelProps) {
+    const { t } = useTranslation();
     
     const formatTime = () => {
-        const hours = Math.floor(documentValue.timeSpent / 3600);
-        const minutes = Math.floor((documentValue.timeSpent % 3600) / 60);
-        const seconds = documentValue.timeSpent % 60;
+        const timeSpent = documentValue.timeSpent ?? 0;
+        const hours = Math.floor(timeSpent / 3600);
+        const minutes = Math.floor((timeSpent % 3600) / 60);
+        const seconds = timeSpent % 60;
         if (hours > 0) {
             return `${hours}${t('h')} ${minutes}${t('m')}`;
         } else if (minutes > 0) {
@@ -36,13 +54,14 @@ function DashboardPanel({configData, documentValue, exportSettings, progress, se
                     aria-label="Toggle Enabled"
                     isSelected={configData.current.isEnabled}
                     onChange={() => {
-                        configData.current.isEnabled = !configData.current.isEnabled;
-                        forceUpdate({});
+                        onConfigChange({
+                            isEnabled: !configData.current.isEnabled
+                        });
                     }}
                 >
                     {configData.current.isEnabled ? t('Enabled') : t('Disabled')}
                 </Switch>
-                <ExportReplayButton configData={configData} documentValue={documentValue} exportSettings={exportSettings} progress={progress} setProgress={setProgress}/>
+                <ExportReplayButton configData={configData} documentValue={documentValue} exportSettings={exportSettings} progress={progress} setProgress={setProgress} onExportSettingsChange={onExportSettingsChange}/>
             </Flex>
             <Flex direction="column" marginBottom="size-500">
                 <Flex direction="row" justifyContent="space-between" marginBottom="size-100">
@@ -57,8 +76,7 @@ function DashboardPanel({configData, documentValue, exportSettings, progress, se
                                     aria-label="Open Current Document Process Image Folder"
                                     onPress={() => {
                                         try {
-                                            //@ts-ignore
-                                            openLocalPath(path.join(configData.current.processImageFolderPath, documentValue.createTime));
+                                            openLocalPath(path.join(configData.current.processImageFolderPath, documentValue.createTime || ""));
                                         } catch (error) {
                                             alert(error);
                                         }
@@ -73,7 +91,7 @@ function DashboardPanel({configData, documentValue, exportSettings, progress, se
                         )}
                         <TextField
                             width="size-1200"
-                            value={documentValue.id ? documentValue.name : ""}
+                            value={documentValue.id ? documentValue.name || "" : ""}
                             isReadOnly
                         />
                     </Flex>
@@ -95,7 +113,7 @@ function DashboardPanel({configData, documentValue, exportSettings, progress, se
                         )}
                         <TextField
                             width="size-1200"
-                            value={documentValue.id ? documentValue.count : ""}
+                            value={documentValue.id ? String(documentValue.count ?? "") : ""}
                             isReadOnly
                         />
                     </Flex>
@@ -116,7 +134,6 @@ function DashboardPanel({configData, documentValue, exportSettings, progress, se
                 <Link 
                     onPress={() => {
                         try {
-                            //@ts-ignore
                             window.cep.util.openURLInDefaultBrowser("https://github.com/F-know/F_Record")
                         } catch (error) {
                             //pass

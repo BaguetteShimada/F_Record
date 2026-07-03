@@ -14,10 +14,13 @@ https://github.com/user-attachments/assets/0221cee9-ac70-48d1-b85a-b85667813b90
 
 ## Installation
 
-1. Download the plugin zip file [F_Record.zip](https://github.com/F-know/F_Record/releases/download/3.0/F_Record.zip), extract it, and open the folder.
+1. Install ffmpeg, and make sure `ffmpeg` and `ffprobe` can be run from the system environment.
+   The recommended setup is to add ffmpeg's `bin` directory to the Windows `PATH`. If you do not want to change `PATH`, set `F_RECORD_FFMPEG_PATH` and `F_RECORD_FFPROBE_PATH` to the full paths of `ffmpeg.exe` and `ffprobe.exe`.
 
-2. Inside, you will find two folders: `com.f_know.f_record.cep` and `com.f_know.f_record.generator`. Copy them into the corresponding locations in your main Photoshop directory.  
-   The main Photoshop directory typically looks like `D:\Adobe Photoshop 2022`.  
+2. Download the plugin zip file [F_Record.zip](https://github.com/F-know/F_Record/releases/download/3.0/F_Record.zip), extract it, and open the folder.
+
+3. Inside, you will find two folders: `com.f_know.f_record.cep` and `com.f_know.f_record.generator`. Copy them into the corresponding locations in your main Photoshop directory.
+   The main Photoshop directory typically looks like `D:\Adobe Photoshop 2022`.
    You can tell if it’s the correct directory if you see the Photoshop executable `Photoshop.exe` (not a shortcut).
 
    - Place the `com.f_know.f_record.cep` folder in the path similar to `D:\Adobe Photoshop 2022\Required\CEP\extensions`.
@@ -25,11 +28,11 @@ https://github.com/user-attachments/assets/0221cee9-ac70-48d1-b85a-b85667813b90
 
    Note: If your Photoshop installation is missing a certain subfolder (like `Generator` under `Plug-ins`), you may need to create it manually.
 
-3. Open Photoshop, then go to **Edit → Preferences → Plugins**. Check whether **Enable Generator** and **Load Extension Panels** are selected.  
-   - If they are not checked, select them and restart Photoshop.  
+4. Open Photoshop, then go to **Edit → Preferences → Plugins**. Check whether **Enable Generator** and **Load Extension Panels** are selected.
+   - If they are not checked, select them and restart Photoshop.
    - If they are already checked, there’s no need to restart.
 
-4. Finally, go to **Window → Extensions (legacy)** in Photoshop. You should see the plugin listed there. Click on it to start using it.
+5. Finally, go to **Window → Extensions (legacy)** in Photoshop. You should see the plugin listed there. Click on it to start using it.
 
 ## Usage Instructions
 

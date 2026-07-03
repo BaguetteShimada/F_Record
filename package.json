@@ -4,7 +4,9 @@
   "description": "一款用来录制绘画过程的轻量级PS插件。",
   "main": "build.js",
   "scripts": {
-    "build": "node build.js"
+    "build": "node build.js",
+    "test": "node test/projectRunner.test.js && node test/build.test.js && node validate.js",
+    "validate": "node validate.js"
   },
   "repository": {
     "type": "git",
@@ -17,7 +19,6 @@
   },
   "homepage": "https://github.com/F-know/F_Record#readme",
   "dependencies": {
-    "adm-zip": "^0.5.16",
-    "fs-extra": "^11.3.0"
+    "adm-zip": "^0.5.16"
   }
 }

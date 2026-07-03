@@ -1,113 +1,112 @@
-import { ButtonGroup, Checkbox, Footer, Item, Picker, ProgressBar } from '@adobe/react-spectrum';
-import { ActionButton } from '@adobe/react-spectrum';
-import { TextField } from '@adobe/react-spectrum';
+import { Item, Picker, ProgressBar } from '@adobe/react-spectrum';
 import { Flex } from '@adobe/react-spectrum';
-import { Content, Divider, Heading } from '@adobe/react-spectrum';
+import { Content } from '@adobe/react-spectrum';
 import { Dialog } from '@adobe/react-spectrum';
 import { Button } from '@adobe/react-spectrum';
 import { DialogTrigger } from '@adobe/react-spectrum';
 import {ToastContainer, ToastQueue} from '@adobe/react-spectrum'
 import * as React from 'react';
 import Replay from '@spectrum-icons/workflow/Replay';
-import FolderOpen from '@spectrum-icons/workflow/FolderOpen';
 import { Text } from '@adobe/react-spectrum';
 import { useTranslation } from 'react-i18next';
-import { exportTempFolderPath, finalJPGPath } from './constants';
 import { FPS } from './constants';
+import type { ConfigData, CurrentDocumentValue, ExportProgress, ExportSettings } from './models';
+import { prepareExportReplayParams, runPreparedExportReplay } from './exportReplayService';
+import { getExportErrorCode, getMissingExportBinaryName } from './exportErrors';
 
+interface ExportReplayButtonProps {
+    configData: React.MutableRefObject<ConfigData>;
+    documentValue: CurrentDocumentValue;
+    exportSettings: React.MutableRefObject<ExportSettings>;
+    progress: ExportProgress;
+    setProgress: React.Dispatch<React.SetStateAction<ExportProgress>>;
+    onExportSettingsChange: (exportSettingsChange: Partial<ExportSettings>) => void;
+}
 
-function ExportReplayButton({configData, documentValue, exportSettings, progress, setProgress}) {
+function ExportReplayButton({
+    configData,
+    documentValue,
+    exportSettings,
+    progress,
+    setProgress,
+    onExportSettingsChange,
+}: ExportReplayButtonProps) {
     const { t } = useTranslation();
 
-    const [, forceUpdate] = React.useState({});
-
     const estimateDuration = () => {
-        return Math.floor(documentValue.count / FPS) + 3;
+        return Math.floor((documentValue.count ?? 0) / FPS) + 3;
     }
 
-    const prepareExportParams = async () => {
-        const exportParams = {
-            configData: configData.current,
-            documentValue: documentValue,
-            exportSettings: exportSettings.current,
-            exportTempFolderPath: exportTempFolderPath,
+    const getExportFailureMessage = (error: unknown): string => {
+        const binaryName = getMissingExportBinaryName(error);
+        if (binaryName !== null) {
+            return t('Export binary missing', { binaryName });
         }
-
-        //@ts-ignore
-        if (isExist(exportTempFolderPath)) {
-            //@ts-ignore
-            deleteDir(exportTempFolderPath);
+        switch (getExportErrorCode(error)) {
+        case "NO_ACTIVE_DOCUMENT":
+            return t('Export error no active document');
+        case "DOCUMENT_BOUNDS_UNAVAILABLE":
+            return t('Export error document bounds unavailable');
+        case "NO_RECORDED_IMAGES":
+            return t('Export error no recorded images');
+        case "EXPORT_SAVE_PATH_EMPTY":
+            return t('Export error save path empty');
+        case "PROCESS_IMAGE_FOLDER_EMPTY":
+            return t('Export error process folder empty');
+        case "RECORDED_IMAGE_FOLDER_MISSING":
+            return t('Export error recorded folder missing');
+        case "EXPORT_IMAGE_FILES_EMPTY":
+        case "EXPORT_VALID_IMAGE_FILES_EMPTY":
+            return t('Export error image files empty');
         }
-        //@ts-ignore
-        createDir(exportTempFolderPath);
-        
-        await new Promise((resolve, reject) => {
-            //@ts-ignore
-            cs.evalScript("$.f_record.generateFinalJPG('" + encodeURIComponent(finalJPGPath) + "')", function(result) {
-                //@ts-ignore
-                if (result === EvalScript_ErrMessage){
-                    reject(new Error(result));
-                }
-                resolve(null);
-            });
-        });
-        return exportParams;
+        return t('Export failed');
     }
 
-    const clickConfirm = async (close) => {
-        //@ts-ignore
-        const result = window.cep.fs.showSaveDialogEx(t("Select Export Path"), "", ["mp4"], documentValue.name + ".mp4", "MP4 (*.mp4)");
+    const clickConfirm = async (close: () => void) => {
+        const result = window.cep.fs.showSaveDialogEx(t("Select Export Path"), "", ["mp4"], `${documentValue.name || ""}.mp4`, "MP4 (*.mp4)");
         if (result.err === 0 && result.data !== "") {
-            exportSettings.current.savePath = result.data;
+            const nextExportSettings = {
+                ...exportSettings.current,
+                savePath: result.data,
+                isExporting: true,
+            };
+            onExportSettingsChange({
+                savePath: result.data,
+                isExporting: true,
+            });
             close();
             
             setProgress({
                 status: "",
                 percent: 0
             });
-            exportSettings.current.isExporting = true;
-            forceUpdate({});
             ToastQueue.info(t('Start to export'), {timeout: 5000});
             
 
-            let exportParams = null;
             try {
-                exportParams = await prepareExportParams();
-            } catch (error) {
-                ToastQueue.negative(t('Export failed'), {
-                    actionLabel: t('Details'),
-                    //@ts-ignore
-                    onAction: () => showError(error)
-                });
-                exportSettings.current.isExporting = false;
-                forceUpdate({});
-                return;
-            }
-            try{
-                //@ts-ignore
-                await exportReplay(exportParams, (nowProgress) => {
+                const exportParams = await prepareExportReplayParams(configData.current, documentValue, nextExportSettings);
+                await runPreparedExportReplay(exportParams, (nowProgress) => {
                     setProgress(nowProgress);
                 });
                 ToastQueue.positive(t('Export success'), {
                     actionLabel: t('Open'),
                     onAction: () => {
                         try {
-                            //@ts-ignore
-                            openLocalPath(exportSettings.current.savePath);
+                            openLocalPath(result.data);
                         } catch (error) {
                             //pass
                         }
                     }
                 });
             } catch (error) {
-                ToastQueue.negative(t('Export failed'), {
+                ToastQueue.negative(getExportFailureMessage(error), {
                     actionLabel: t('Details'),
-                    //@ts-ignore
                     onAction: () => showError(error)
                 });
             } finally {
-                exportSettings.current.isExporting = false;
-                forceUpdate({});
+                onExportSettingsChange({
+                    isExporting: false
+                });
             }
         }
     }
@@ -132,9 +131,10 @@ function ExportReplayButton({configData, documentValue, exportSettings, progress
                                         <Text>{t('Aspect Ratio')}</Text>
                                         <Picker aria-label="Replay Aspect Ratio"
                                             selectedKey={exportSettings.current.aspectRatio}
-                                            onSelectionChange={(key: string) => {
-                                                exportSettings.current.aspectRatio = key;
-                                                forceUpdate({});
+                                            onSelectionChange={(key) => {
+                                                onExportSettingsChange({
+                                                    aspectRatio: String(key)
+                                                });
                                             }}
                                             width="size-1600">
                                             <Item key="1.7778">16:9</Item>
@@ -149,9 +149,10 @@ function ExportReplayButton({configData, documentValue, exportSettings, progress
                                         <Text>{t('Duration')}</Text>
                                         <Picker aria-label="Replay Duration"
                                             selectedKey={exportSettings.current.duration}
-                                            onSelectionChange={(key: string) => {
-                                                exportSettings.current.duration = key;
-                                                forceUpdate({});
+                                            onSelectionChange={(key) => {
+                                                onExportSettingsChange({
+                                                    duration: String(key)
+                                                });
                                             }}
                                             width="size-1600">
                                             {15 < estimateDuration() && <Item key="15">{15 + t('s')}</Item>}
@@ -184,4 +185,4 @@ function ExportReplayButton({configData, documentValue, exportSettings, progress
     );
 };
 
-export default ExportReplayButton; 
+export default ExportReplayButton;

@@ -3,10 +3,13 @@
   "version": "3.0.0",
   "author": "F_know",
   "scripts": {
-    "build": "webpack --mode production"
+    "build": "webpack --config webpack.cep.config.js --mode production",
+    "typecheck": "tsc --project tsconfig.cep.json --noEmit",
+    "test": "node test/exportReplayUtils.test.js && node test/exportReplayWorker.test.js"
   },
   "dependencies": {
     "@adobe/react-spectrum": "^3.40.0",
+    "@spectrum-icons/workflow": "^4.3.1",
     "i18next": "^21.10.0",
     "path-browserify": "^1.0.1",
     "react": "^16.9.0",

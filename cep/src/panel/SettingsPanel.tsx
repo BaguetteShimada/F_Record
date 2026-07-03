@@ -1,15 +1,19 @@
 import * as React from 'react';
-import { RadioGroup, Radio, TextField, Tooltip, TooltipTrigger, ContextualHelp, Content, Heading } from "@adobe/react-spectrum";
+import { RadioGroup, Radio, TextField, Tooltip, TooltipTrigger, ContextualHelp, Content } from "@adobe/react-spectrum";
 import { Text } from "@adobe/react-spectrum";
 import { Picker } from "@adobe/react-spectrum";
 import { ActionButton, Item } from "@adobe/react-spectrum";
 import { Flex } from "@adobe/react-spectrum";
 import FolderOpen from '@spectrum-icons/workflow/FolderOpen';
 import { useTranslation } from 'react-i18next';
+import type { ConfigData } from './models';
 
+interface SettingsPanelProps {
+    configData: React.MutableRefObject<ConfigData>;
+    onConfigChange: (configChange: Partial<ConfigData>) => void;
+}
 
-function SettingsPanel({configData, documentValue}) {
-    const [, forceUpdate] = React.useState({});
+function SettingsPanel({configData, onConfigChange}: SettingsPanelProps) {
     const { t , i18n } = useTranslation();
 
     return(
@@ -28,11 +32,11 @@ function SettingsPanel({configData, documentValue}) {
                         <ActionButton
                             aria-label="Select Process Image Folder"
                             onPress={() => {
-                                //@ts-ignore
                                 const result = window.cep.fs.showOpenDialog(false, true, t("Select Process Image Folder"), configData.current.processImageFolderPath);
                                 if (result.err === 0 && result.data.length > 0) {
-                                    configData.current.processImageFolderPath = result.data[0];
-                                    forceUpdate({});
+                                    onConfigChange({
+                                        processImageFolderPath: result.data[0]
+                                    });
                                 }
                             }}
                             >
@@ -47,9 +51,10 @@ function SettingsPanel({configData, documentValue}) {
                     <Text>{t('Resolution')}</Text>
                     <Picker aria-label="Resolution"
                         selectedKey={configData.current.resolution}
-                        onSelectionChange={(key: string) => {
-                            configData.current.resolution = key;
-                            forceUpdate({});
+                        onSelectionChange={(key) => {
+                            onConfigChange({
+                                resolution: String(key)
+                            });
                         }}
                         width="size-1200">
                         <Item key="360">360p</Item>
@@ -71,9 +76,10 @@ function SettingsPanel({configData, documentValue}) {
                     </Flex>
                     <Picker aria-label="Quality"
                         selectedKey={configData.current.quality}
-                        onSelectionChange={(key: string) => {
-                            configData.current.quality = key;
-                            forceUpdate({});
+                        onSelectionChange={(key) => {
+                            onConfigChange({
+                                quality: String(key)
+                            });
                         }}
                         width="size-1200">
                         <Item key="20">{t('low')}</Item>
@@ -94,9 +100,10 @@ function SettingsPanel({configData, documentValue}) {
                     </Flex>
                     <Picker aria-label="Idle Timeout"
                         selectedKey={configData.current.idleTimeout}
-                        onSelectionChange={(key: string) => {
-                            configData.current.idleTimeout = key;
-                            forceUpdate({});
+                        onSelectionChange={(key) => {
+                            onConfigChange({
+                                idleTimeout: String(key)
+                            });
                         }}
                         width="size-1200">
                         <Item key="1">{1 + t('min')}</Item>
@@ -112,10 +119,11 @@ function SettingsPanel({configData, documentValue}) {
                 <RadioGroup
                     orientation="horizontal"
                     value={configData.current.language}
-                    onChange={(value: string) => {
-                        configData.current.language = value;
+                    onChange={(value) => {
                         i18n.changeLanguage(value);
-                        forceUpdate({});
+                        onConfigChange({
+                            language: value
+                        });
                     }}
                 >
                     <Radio value="cn">中文</Radio>
