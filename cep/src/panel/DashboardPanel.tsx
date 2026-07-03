@@ -1,12 +1,8 @@
 import * as React from 'react';
-import { ActionButton, TooltipTrigger, Tooltip } from "@adobe/react-spectrum";
-import { TextField } from "@adobe/react-spectrum";
-import { Text } from "@adobe/react-spectrum";
+import { ActionButton, Tooltip, TooltipTrigger } from '@adobe/react-spectrum';
 import ExportReplayButton from "./ExportReplayButton";
-import FolderOpen from '@spectrum-icons/workflow/FolderOpen';
 import Clock from '@spectrum-icons/workflow/Clock';
 import Images from '@spectrum-icons/workflow/Images';
-import DocumentOutline from '@spectrum-icons/workflow/DocumentOutline';
 import { useTranslation } from 'react-i18next';
 import type { ConfigData, CurrentDocumentValue, ExportProgress, ExportSettings } from './models';
 import { GITHUB_REPOSITORY_URL, openExternalUrl } from './externalLinks';
@@ -19,6 +15,7 @@ import RecordToggleButton from './RecordToggleButton';
 import GitHubIcon from './GitHubIcon';
 import { openCurrentDocumentProcessImageFolder } from './documentFolderActions';
 import DashboardTextRow from './DashboardTextRow';
+import DashboardDocumentRow from './DashboardDocumentRow';
 
 interface DashboardPanelProps {
     configData: React.MutableRefObject<ConfigData>;
@@ -59,34 +56,16 @@ function DashboardPanel({
                 <ExportReplayButton configData={configData} documentValue={documentValue} exportSettings={exportSettings} progress={progress} setProgress={setProgress} onExportSettingsChange={onExportSettingsChange} onError={onError}/>
             </div>
             <div className="fr-dashboard-section">
-                <div className="fr-data-row">
-                    <div className="fr-row-label">
-                        <DocumentOutline size="S" />
-                        <Text>{t('Document')}</Text>
-                    </div>
-                    <div className="fr-document-value">
-                        <TextField
-                            width="100%"
-                            value={getDocumentNameDisplayValue(documentValue)}
-                            isReadOnly
-                        />
-                        {documentValue.id && (
-                            <TooltipTrigger delay={0}>
-                                <ActionButton
-                                    aria-label="Open Current Document Process Image Folder"
-                                    onPress={() => {
-                                        openCurrentDocumentProcessImageFolder(configData.current, documentValue, onError);
-                                    }}
-                                    isDisabled={!documentValue.count}
-                                    UNSAFE_className="fr-document-folder-button"
-                                    >
-                                    <FolderOpen />
-                                </ActionButton>
-                                <Tooltip>{t('Open Process Image Folder')}</Tooltip>
-                            </TooltipTrigger>
-                        )}
-                    </div>
-                </div>
+                <DashboardDocumentRow
+                    label={t('Document')}
+                    value={getDocumentNameDisplayValue(documentValue)}
+                    showOpenButton={Boolean(documentValue.id)}
+                    isOpenButtonDisabled={!documentValue.count}
+                    openButtonLabel={t('Open Process Image Folder')}
+                    onOpenFolder={() => {
+                        openCurrentDocumentProcessImageFolder(configData.current, documentValue, onError);
+                    }}
+                />
                 <DashboardTextRow
                     icon={<Images size="S" />}
                     label={t('Image Count')}
