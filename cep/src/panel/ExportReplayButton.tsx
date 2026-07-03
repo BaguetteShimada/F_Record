@@ -4,7 +4,7 @@ import { Content } from '@adobe/react-spectrum';
 import { Dialog } from '@adobe/react-spectrum';
 import { Button } from '@adobe/react-spectrum';
 import { DialogTrigger } from '@adobe/react-spectrum';
-import {ToastContainer, ToastQueue} from '@adobe/react-spectrum'
+import {ToastQueue} from '@adobe/react-spectrum'
 import * as React from 'react';
 import Replay from '@spectrum-icons/workflow/Replay';
 import { Text } from '@adobe/react-spectrum';
@@ -113,7 +113,6 @@ function ExportReplayButton({
 
     return (
         <>
-            <ToastContainer placement="bottom" />
             {!exportSettings.current.isExporting ? (
                 <DialogTrigger isDismissable>
                     <Button 
