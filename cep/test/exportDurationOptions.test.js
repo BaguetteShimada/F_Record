@@ -30,6 +30,7 @@ function normalize(value) {
 
 const {
     estimateReplayDurationSeconds,
+    getReplayDurationOptions,
     getReplayDurationPresetSeconds,
 } = loadExportDurationOptionsModule();
 
@@ -61,4 +62,22 @@ assert.deepStrictEqual(
 assert.deepStrictEqual(
     normalize(getReplayDurationPresetSeconds(4450, 25)),
     [15, 30, 60, 180],
+);
+
+assert.deepStrictEqual(
+    normalize(getReplayDurationOptions(300, 25)),
+    [{
+        key: "0",
+        durationSeconds: 15,
+        isOriginal: true,
+    }],
+);
+assert.deepStrictEqual(
+    normalize(getReplayDurationOptions(1500, 25)),
+    [
+        { key: "15", durationSeconds: 15, isOriginal: false },
+        { key: "30", durationSeconds: 30, isOriginal: false },
+        { key: "60", durationSeconds: 60, isOriginal: false },
+        { key: "0", durationSeconds: 63, isOriginal: true },
+    ],
 );

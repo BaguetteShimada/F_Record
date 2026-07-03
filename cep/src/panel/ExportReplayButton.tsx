@@ -4,7 +4,7 @@ import Replay from '@spectrum-icons/workflow/Replay';
 import { useTranslation } from 'react-i18next';
 import { FPS } from './constants';
 import type { ConfigData, CurrentDocumentValue, ExportProgress, ExportSettings } from './models';
-import { estimateReplayDurationSeconds, getReplayDurationPresetSeconds } from './exportDurationOptions';
+import { getReplayDurationOptions } from './exportDurationOptions';
 import { prepareExportReplayParams, runPreparedExportReplay } from './exportReplayService';
 import { getExportFailureMessageDescriptor } from './exportErrors';
 import { selectExportSavePath } from './exportSaveDialog';
@@ -37,9 +37,7 @@ function ExportReplayButton({
 }: ExportReplayButtonProps) {
     const { t } = useTranslation();
 
-    const estimatedDuration = estimateReplayDurationSeconds(documentValue.count, FPS);
-    const durationPresets = getReplayDurationPresetSeconds(documentValue.count, FPS);
-    const hasDurationPreset = (duration: number) => durationPresets.indexOf(duration) >= 0;
+    const durationOptions = getReplayDurationOptions(documentValue.count, FPS);
 
     const getExportFailureMessage = (error: unknown): string => {
         const message = getExportFailureMessageDescriptor(error);
@@ -125,11 +123,11 @@ function ExportReplayButton({
                                                 applyExportStringOptionChange('duration', key, onExportSettingsChange);
                                             }}
                                             width="size-1600">
-                                            {hasDurationPreset(15) && <Item key="15">{15 + t('s')}</Item>}
-                                            {hasDurationPreset(30) && <Item key="30">{30 + t('s')}</Item>}
-                                            {hasDurationPreset(60) && <Item key="60">{60 + t('s')}</Item>}
-                                            {hasDurationPreset(180) && <Item key="180">{180 + t('s')}</Item>}
-                                            <Item key="0">{estimatedDuration + t('s') + ' ' + t('(original)')}</Item>
+                                            {durationOptions.map((option) => (
+                                                <Item key={option.key}>
+                                                    {option.durationSeconds + t('s') + (option.isOriginal ? ' ' + t('(original)') : '')}
+                                                </Item>
+                                            ))}
                                         </Picker>
                                     </Flex>
                                     <Flex justifyContent="center">
