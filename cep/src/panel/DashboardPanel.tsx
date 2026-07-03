@@ -10,8 +10,12 @@ import DocumentOutline from '@spectrum-icons/workflow/DocumentOutline';
 import { useTranslation } from 'react-i18next';
 import path from 'path-browserify';
 import type { ConfigData, CurrentDocumentValue, ExportProgress, ExportSettings } from './models';
-import { formatElapsedTime } from './timeFormatting';
 import { GITHUB_REPOSITORY_URL, openExternalUrl } from './externalLinks';
+import {
+    getDocumentNameDisplayValue,
+    getImageCountDisplayValue,
+    getTimeSpentDisplayValue,
+} from './dashboardValues';
 
 function GitHubIcon() {
     return (
@@ -85,7 +89,7 @@ function DashboardPanel({
                     <div className="fr-document-value">
                         <TextField
                             width="100%"
-                            value={documentValue.id ? documentValue.name || "" : ""}
+                            value={getDocumentNameDisplayValue(documentValue)}
                             isReadOnly
                         />
                         {documentValue.id && (
@@ -117,7 +121,7 @@ function DashboardPanel({
                     <div className="fr-row-value">
                         <TextField
                             width="100%"
-                            value={documentValue.id ? String(documentValue.count ?? "") : ""}
+                            value={getImageCountDisplayValue(documentValue)}
                             isReadOnly
                         />
                     </div>
@@ -130,11 +134,11 @@ function DashboardPanel({
                     <div className="fr-row-value">
                         <TextField
                             width="100%"
-                            value={documentValue.id ? formatElapsedTime(documentValue.timeSpent, {
+                            value={getTimeSpentDisplayValue(documentValue, {
                                 hours: t('h'),
                                 minutes: t('m'),
                                 seconds: t('s'),
-                            }) : ""}
+                            })}
                             isReadOnly
                         />
                     </div>
