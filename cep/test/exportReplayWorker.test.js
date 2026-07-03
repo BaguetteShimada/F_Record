@@ -184,6 +184,20 @@ function createFakeWorker(onSend) {
         }),
         "C:\\Program Files\\Adobe\\Adobe Photoshop 2022\\node.exe",
     );
+
+    assert.strictEqual(
+        resolveNodeCommand({
+            baseDir: "C:\\Program Files\\Adobe\\Adobe Photoshop 2022\\Required\\CEP\\extensions\\com.f_know.f_record.cep\\js",
+            env: {},
+            fs: {
+                statSync() {
+                    throw new Error("not found");
+                },
+            },
+            platform: "win32",
+        }),
+        "node.exe",
+    );
 })().catch(error => {
     console.error(error);
     process.exit(1);
