@@ -3,6 +3,7 @@ import { Button, DialogTrigger, Text, ToastQueue } from '@adobe/react-spectrum';
 import Replay from '@spectrum-icons/workflow/Replay';
 import { useTranslation } from 'react-i18next';
 import { FPS } from './constants';
+import { createDefaultExportProgress } from './models';
 import type { ConfigData, CurrentDocumentValue, ExportProgress, ExportSettings } from './models';
 import { getReplayDurationOptions } from './exportDurationOptions';
 import { prepareExportReplayParams, runPreparedExportReplay } from './exportReplayService';
@@ -51,10 +52,7 @@ function ExportReplayButton({
             onExportSettingsChange(createStartExportSettingsChange(savePath));
             close();
             
-            setProgress({
-                status: "",
-                percent: 0
-            });
+            setProgress(createDefaultExportProgress());
             ToastQueue.info(t('Start to export'), {timeout: 5000});
             
 
