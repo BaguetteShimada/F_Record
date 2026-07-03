@@ -12,7 +12,7 @@ import { useTranslation } from 'react-i18next';
 import { FPS } from './constants';
 import type { ConfigData, CurrentDocumentValue, ExportProgress, ExportSettings } from './models';
 import { prepareExportReplayParams, runPreparedExportReplay } from './exportReplayService';
-import { getExportErrorCode, getMissingExportBinaryName } from './exportErrors';
+import { getExportFailureMessageDescriptor } from './exportErrors';
 
 interface ExportReplayButtonProps {
     configData: React.MutableRefObject<ConfigData>;
@@ -38,28 +38,8 @@ function ExportReplayButton({
     }
 
     const getExportFailureMessage = (error: unknown): string => {
-        const binaryName = getMissingExportBinaryName(error);
-        if (binaryName !== null) {
-            return t('Export binary missing', { binaryName });
-        }
-        switch (getExportErrorCode(error)) {
-        case "NO_ACTIVE_DOCUMENT":
-            return t('Export error no active document');
-        case "DOCUMENT_BOUNDS_UNAVAILABLE":
-            return t('Export error document bounds unavailable');
-        case "NO_RECORDED_IMAGES":
-            return t('Export error no recorded images');
-        case "EXPORT_SAVE_PATH_EMPTY":
-            return t('Export error save path empty');
-        case "PROCESS_IMAGE_FOLDER_EMPTY":
-            return t('Export error process folder empty');
-        case "RECORDED_IMAGE_FOLDER_MISSING":
-            return t('Export error recorded folder missing');
-        case "EXPORT_IMAGE_FILES_EMPTY":
-        case "EXPORT_VALID_IMAGE_FILES_EMPTY":
-            return t('Export error image files empty');
-        }
-        return t('Export failed');
+        const message = getExportFailureMessageDescriptor(error);
+        return t(message.key, message.values);
     }
 
     const clickConfirm = async (close: () => void) => {
