@@ -18,6 +18,7 @@ import {
 import RecordToggleButton from './RecordToggleButton';
 import GitHubIcon from './GitHubIcon';
 import { openCurrentDocumentProcessImageFolder } from './documentFolderActions';
+import DashboardTextRow from './DashboardTextRow';
 
 interface DashboardPanelProps {
     configData: React.MutableRefObject<ConfigData>;
@@ -86,36 +87,20 @@ function DashboardPanel({
                         )}
                     </div>
                 </div>
-                <div className="fr-data-row">
-                    <div className="fr-row-label">
-                        <Images size="S" />
-                        <Text>{t('Image Count')}</Text>
-                    </div>
-                    <div className="fr-row-value">
-                        <TextField
-                            width="100%"
-                            value={getImageCountDisplayValue(documentValue)}
-                            isReadOnly
-                        />
-                    </div>
-                </div>
-                <div className="fr-data-row">
-                    <div className="fr-row-label">
-                        <Clock size="S" />
-                        <Text>{t('Time Spent')}</Text>
-                    </div>
-                    <div className="fr-row-value">
-                        <TextField
-                            width="100%"
-                            value={getTimeSpentDisplayValue(documentValue, {
-                                hours: t('h'),
-                                minutes: t('m'),
-                                seconds: t('s'),
-                            })}
-                            isReadOnly
-                        />
-                    </div>
-                </div>
+                <DashboardTextRow
+                    icon={<Images size="S" />}
+                    label={t('Image Count')}
+                    value={getImageCountDisplayValue(documentValue)}
+                />
+                <DashboardTextRow
+                    icon={<Clock size="S" />}
+                    label={t('Time Spent')}
+                    value={getTimeSpentDisplayValue(documentValue, {
+                        hours: t('h'),
+                        minutes: t('m'),
+                        seconds: t('s'),
+                    })}
+                />
             </div>
             <div className="fr-community-links">
                 <TooltipTrigger delay={0}>
