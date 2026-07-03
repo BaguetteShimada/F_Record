@@ -6,7 +6,6 @@ import { FPS } from './constants';
 import { createDefaultExportProgress } from './models';
 import type { ConfigData, CurrentDocumentValue, ExportProgress, ExportSettings } from './models';
 import { getReplayDurationOptions } from './exportDurationOptions';
-import { prepareExportReplayParams, runPreparedExportReplay } from './exportReplayService';
 import { selectExportSavePath } from './exportSaveDialog';
 import {
     createFinishExportSettingsChange,
@@ -17,6 +16,7 @@ import ExportProgressBar from './ExportProgressBar';
 import ExportReplayDialog from './ExportReplayDialog';
 import { openExportedVideo } from './exportVideoActions';
 import { showExportFailureToast, showExportStartedToast, showExportSuccessToast } from './exportNotifications';
+import { runExportReplayFlow } from './exportReplayFlow';
 
 interface ExportReplayButtonProps {
     configData: React.MutableRefObject<ConfigData>;
@@ -53,8 +53,7 @@ function ExportReplayButton({
             
 
             try {
-                const exportParams = await prepareExportReplayParams(configData.current, documentValue, nextExportSettings);
-                await runPreparedExportReplay(exportParams, (nowProgress) => {
+                await runExportReplayFlow(configData.current, documentValue, nextExportSettings, (nowProgress) => {
                     setProgress(nowProgress);
                 });
                 showExportSuccessToast(t, ToastQueue, () => openExportedVideo(savePath, onError));
