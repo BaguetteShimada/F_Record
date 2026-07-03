@@ -14,6 +14,7 @@ import {
     createStartExportSettingsChange,
 } from './exportSettingsActions';
 import { ASPECT_RATIO_OPTIONS } from './exportDialogOptions';
+import { applyExportStringOptionChange } from './exportOptionActions';
 
 interface ExportReplayButtonProps {
     configData: React.MutableRefObject<ConfigData>;
@@ -106,9 +107,7 @@ function ExportReplayButton({
                                         <Picker aria-label="Replay Aspect Ratio"
                                             selectedKey={exportSettings.current.aspectRatio}
                                             onSelectionChange={(key) => {
-                                                onExportSettingsChange({
-                                                    aspectRatio: String(key)
-                                                });
+                                                applyExportStringOptionChange('aspectRatio', key, onExportSettingsChange);
                                             }}
                                             width="size-1600">
                                             {ASPECT_RATIO_OPTIONS.map((option) => (
@@ -123,9 +122,7 @@ function ExportReplayButton({
                                         <Picker aria-label="Replay Duration"
                                             selectedKey={exportSettings.current.duration}
                                             onSelectionChange={(key) => {
-                                                onExportSettingsChange({
-                                                    duration: String(key)
-                                                });
+                                                applyExportStringOptionChange('duration', key, onExportSettingsChange);
                                             }}
                                             width="size-1600">
                                             {hasDurationPreset(15) && <Item key="15">{15 + t('s')}</Item>}
