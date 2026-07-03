@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { ActionButton, ProgressCircle, TooltipTrigger, Tooltip, Link } from "@adobe/react-spectrum";
+import { ActionButton, TooltipTrigger, Tooltip, Link } from "@adobe/react-spectrum";
 import { TextField } from "@adobe/react-spectrum";
 import { Text } from "@adobe/react-spectrum";
 import ExportReplayButton from "./ExportReplayButton";
@@ -117,15 +117,6 @@ function DashboardPanel({
                         <Text>{t('Image Count')}</Text>
                     </div>
                     <div className="fr-row-value">
-                        {documentValue.isGettingImage && (
-                            <ProgressCircle 
-                                aria-label="Loading…" 
-                                isIndeterminate 
-                                size="S"
-                                alignSelf="center"
-                                marginEnd="size-150"
-                            />
-                        )}
                         <TextField
                             width="100%"
                             value={documentValue.id ? String(documentValue.count ?? "") : ""}
