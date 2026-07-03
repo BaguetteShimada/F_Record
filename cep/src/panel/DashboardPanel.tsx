@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { ActionButton, ProgressCircle, Switch, TooltipTrigger, Tooltip, Link } from "@adobe/react-spectrum";
+import { ActionButton, ProgressCircle, TooltipTrigger, Tooltip, Link } from "@adobe/react-spectrum";
 import { TextField } from "@adobe/react-spectrum";
 import { Text } from "@adobe/react-spectrum";
 import ExportReplayButton from "./ExportReplayButton";
@@ -57,17 +57,25 @@ function DashboardPanel({
     return(
         <div className="fr-dashboard">
             <div className="fr-dashboard-toolbar">
-                <Switch
+                <button
+                    type="button"
+                    role="switch"
+                    aria-checked={configData.current.isEnabled}
                     aria-label="Toggle Enabled"
-                    isSelected={configData.current.isEnabled}
-                    onChange={() => {
+                    className="fr-record-switch"
+                    onClick={() => {
                         onConfigChange({
                             isEnabled: !configData.current.isEnabled
                         });
                     }}
                 >
-                    {configData.current.isEnabled ? t('Enabled') : t('Disabled')}
-                </Switch>
+                    <span className="fr-record-switch-track" aria-hidden="true">
+                        <span className="fr-record-switch-thumb" />
+                    </span>
+                    <span className="fr-record-switch-label">
+                        {configData.current.isEnabled ? t('Enabled') : t('Disabled')}
+                    </span>
+                </button>
                 <ExportReplayButton configData={configData} documentValue={documentValue} exportSettings={exportSettings} progress={progress} setProgress={setProgress} onExportSettingsChange={onExportSettingsChange}/>
             </div>
             <div className="fr-dashboard-section">
