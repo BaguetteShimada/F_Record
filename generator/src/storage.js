@@ -1,8 +1,8 @@
 const fs = require("fs");
 const writeFileAtomic = require("write-file-atomic");
 
-function pathExists(targetPath) {
-    return fs.existsSync(targetPath);
+function pathExists(targetPath, fsImpl) {
+    return (fsImpl || fs).existsSync(targetPath);
 }
 
 function ensureDirectory(directoryPath) {
@@ -11,15 +11,27 @@ function ensureDirectory(directoryPath) {
     }
 }
 
-function readJsonFile(filePath) {
-    if (!pathExists(filePath)) {
+function readJsonFile(filePath, options) {
+    const fsImpl = options && options.fs ? options.fs : fs;
+    const retryDelays = options && options.retryDelays ? options.retryDelays : [20, 50];
+    const sleepSyncFn = options && options.sleepSync ? options.sleepSync : sleepSync;
+
+    if (!pathExists(filePath, fsImpl)) {
         return null;
     }
-    try {
-        return JSON.parse(fs.readFileSync(filePath, "utf-8"));
-    } catch (error) {
-        return null;
+
+    for (let i = 0; i <= retryDelays.length; i++) {
+        try {
+            return JSON.parse(fsImpl.readFileSync(filePath, "utf-8"));
+        } catch (error) {
+            if (!shouldRetryReadJsonError(error) || i === retryDelays.length) {
+                return null;
+            }
+            sleepSyncFn(retryDelays[i]);
+        }
     }
+
+    return null;
 }
 
 function writeJsonFileAtomic(filePath, value) {
@@ -49,10 +61,18 @@ function sleepSync(ms) {
     while (Date.now() < end) {}
 }
 
+function shouldRetryReadJsonError(error) {
+    if (error instanceof SyntaxError) {
+        return true;
+    }
+    return Boolean(error && ["EPERM", "EACCES", "EBUSY"].includes(error.code));
+}
+
 module.exports = {
     pathExists,
     ensureDirectory,
     readJsonFile,
+    shouldRetryReadJsonError,
     writeJsonFileAtomic,
     writeFileAtomicSyncWithRetry,
 };
