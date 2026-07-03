@@ -1,7 +1,6 @@
 import * as React from 'react';
 import { ActionButton, ProgressCircle, Switch, TooltipTrigger, Tooltip, Link } from "@adobe/react-spectrum";
 import { TextField } from "@adobe/react-spectrum";
-import { Flex } from "@adobe/react-spectrum";
 import { Text } from "@adobe/react-spectrum";
 import ExportReplayButton from "./ExportReplayButton";
 import OpenIn from '@spectrum-icons/workflow/OpenIn';
@@ -48,8 +47,8 @@ function DashboardPanel({
     }
 
     return(
-        <Flex direction="column" marginY="size-100">
-            <Flex direction="row" justifyContent="space-between" marginBottom="size-500">
+        <div className="fr-dashboard">
+            <div className="fr-dashboard-toolbar">
                 <Switch
                     aria-label="Toggle Enabled"
                     isSelected={configData.current.isEnabled}
@@ -62,14 +61,14 @@ function DashboardPanel({
                     {configData.current.isEnabled ? t('Enabled') : t('Disabled')}
                 </Switch>
                 <ExportReplayButton configData={configData} documentValue={documentValue} exportSettings={exportSettings} progress={progress} setProgress={setProgress} onExportSettingsChange={onExportSettingsChange}/>
-            </Flex>
-            <Flex direction="column" marginBottom="size-500">
-                <Flex direction="row" justifyContent="space-between" marginBottom="size-100">
-                    <Flex direction="row">
-                        <DocumentOutline size="S" marginEnd="size-100"/>
+            </div>
+            <div className="fr-dashboard-section">
+                <div className="fr-data-row">
+                    <div className="fr-row-label">
+                        <DocumentOutline size="S" />
                         <Text>{t('Document')}</Text>
-                    </Flex>
-                    <Flex direction="row">
+                    </div>
+                    <div className="fr-row-value">
                         {documentValue.id && (
                             <TooltipTrigger delay={0}>
                                 <ActionButton
@@ -82,7 +81,7 @@ function DashboardPanel({
                                         }
                                     }}
                                     isDisabled={!documentValue.count}
-                                    marginEnd="size-100"
+                                    UNSAFE_className="fr-process-folder-button"
                                     >
                                     <OpenIn />
                                 </ActionButton>
@@ -90,18 +89,18 @@ function DashboardPanel({
                             </TooltipTrigger>
                         )}
                         <TextField
-                            width="size-1200"
+                            width="100%"
                             value={documentValue.id ? documentValue.name || "" : ""}
                             isReadOnly
                         />
-                    </Flex>
-                </Flex>
-                <Flex direction="row" justifyContent="space-between" marginBottom="size-100">
-                    <Flex direction="row">
-                        <Images size="S" marginEnd="size-100"/>
+                    </div>
+                </div>
+                <div className="fr-data-row">
+                    <div className="fr-row-label">
+                        <Images size="S" />
                         <Text>{t('Image Count')}</Text>
-                    </Flex>
-                    <Flex direction="row">
+                    </div>
+                    <div className="fr-row-value">
                         {documentValue.isGettingImage && (
                             <ProgressCircle 
                                 aria-label="Loading…" 
@@ -112,25 +111,27 @@ function DashboardPanel({
                             />
                         )}
                         <TextField
-                            width="size-1200"
+                            width="100%"
                             value={documentValue.id ? String(documentValue.count ?? "") : ""}
                             isReadOnly
                         />
-                    </Flex>
-                </Flex>
-                <Flex direction="row" justifyContent="space-between">
-                    <Flex direction="row">
-                        <Clock size="S" marginEnd="size-100"/>
+                    </div>
+                </div>
+                <div className="fr-data-row">
+                    <div className="fr-row-label">
+                        <Clock size="S" />
                         <Text>{t('Time Spent')}</Text>
-                    </Flex>
-                    <TextField
-                        maxWidth="size-1200"
-                        value={documentValue.id ? formatTime() : ""}
-                        isReadOnly
-                    />
-                </Flex>
-            </Flex>
-            <Flex direction="row" justifyContent="end" marginBottom="size-500">
+                    </div>
+                    <div className="fr-row-value">
+                        <TextField
+                            width="100%"
+                            value={documentValue.id ? formatTime() : ""}
+                            isReadOnly
+                        />
+                    </div>
+                </div>
+            </div>
+            <div className="fr-github-row">
                 <Link 
                     onPress={() => {
                         try {
@@ -141,8 +142,8 @@ function DashboardPanel({
                     }}>
                         GitHub
                 </Link>
-            </Flex>
-        </Flex>
+            </div>
+        </div>
     );
 }
 

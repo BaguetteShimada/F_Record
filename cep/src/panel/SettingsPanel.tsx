@@ -3,7 +3,6 @@ import { RadioGroup, Radio, TextField, Tooltip, TooltipTrigger, ContextualHelp, 
 import { Text } from "@adobe/react-spectrum";
 import { Picker } from "@adobe/react-spectrum";
 import { ActionButton, Item } from "@adobe/react-spectrum";
-import { Flex } from "@adobe/react-spectrum";
 import FolderOpen from '@spectrum-icons/workflow/FolderOpen';
 import { useTranslation } from 'react-i18next';
 import type { ConfigData } from './models';
@@ -17,16 +16,15 @@ function SettingsPanel({configData, onConfigChange}: SettingsPanelProps) {
     const { t , i18n } = useTranslation();
 
     return(
-        <Flex direction="column" marginY="size-100">
-            <Flex direction="column" marginBottom="size-300">
+        <div className="fr-settings">
+            <div className="fr-settings-section">
                 <Text marginBottom="size-100">{t('Process Image Folder')}</Text>
-                <Flex direction="row">
+                <div className="fr-settings-folder-row">
                     <TextField
                         aria-label="Process Image Folder"
                         value={configData.current.processImageFolderPath}
                         isReadOnly
-                        marginEnd="size-100"
-                        width="size-3000"
+                        width="100%"
                     />
                     <TooltipTrigger delay={0}>
                         <ActionButton
@@ -41,14 +39,16 @@ function SettingsPanel({configData, onConfigChange}: SettingsPanelProps) {
                             }}
                             >
                             <FolderOpen />
-                        </ActionButton>
+                            </ActionButton>
                         <Tooltip>{t('select folder')}</Tooltip>
                     </TooltipTrigger>
-                </Flex>
-            </Flex>
-            <Flex direction="column" marginBottom="size-300">
-                <Flex direction="row" justifyContent="space-between" marginBottom="size-100">
-                    <Text>{t('Resolution')}</Text>
+                </div>
+            </div>
+            <div className="fr-settings-section">
+                <div className="fr-settings-row">
+                    <div className="fr-settings-label">
+                        <Text>{t('Resolution')}</Text>
+                    </div>
                     <Picker aria-label="Resolution"
                         selectedKey={configData.current.resolution}
                         onSelectionChange={(key) => {
@@ -62,9 +62,9 @@ function SettingsPanel({configData, onConfigChange}: SettingsPanelProps) {
                         <Item key="1080">1080p</Item>
                         <Item key="1440">1440p</Item>
                     </Picker>
-                </Flex>
-                <Flex direction="row" justifyContent="space-between" marginBottom="size-100">
-                    <Flex direction="row">
+                </div>
+                <div className="fr-settings-row">
+                    <div className="fr-settings-label">
                         <Text marginEnd="size-100">{t('Quality')}</Text>
                         <ContextualHelp variant="help" placement="top start">
                             <Content>
@@ -73,7 +73,7 @@ function SettingsPanel({configData, onConfigChange}: SettingsPanelProps) {
                                 </Text>
                             </Content>
                         </ContextualHelp>
-                    </Flex>
+                    </div>
                     <Picker aria-label="Quality"
                         selectedKey={configData.current.quality}
                         onSelectionChange={(key) => {
@@ -86,9 +86,9 @@ function SettingsPanel({configData, onConfigChange}: SettingsPanelProps) {
                         <Item key="70">{t('medium')}</Item>
                         <Item key="90">{t('high')}</Item>
                     </Picker>
-                </Flex>
-                <Flex direction="row" justifyContent="space-between">
-                    <Flex direction="row">
+                </div>
+                <div className="fr-settings-row">
+                    <div className="fr-settings-label">
                         <Text marginEnd="size-100">{t('Idle Timeout')}</Text>
                         <ContextualHelp variant="help" placement="top start">
                             <Content>
@@ -97,7 +97,7 @@ function SettingsPanel({configData, onConfigChange}: SettingsPanelProps) {
                                 </Text>
                             </Content>
                         </ContextualHelp>
-                    </Flex>
+                    </div>
                     <Picker aria-label="Idle Timeout"
                         selectedKey={configData.current.idleTimeout}
                         onSelectionChange={(key) => {
@@ -112,10 +112,12 @@ function SettingsPanel({configData, onConfigChange}: SettingsPanelProps) {
                         <Item key="30">{30 + t('min')}</Item>
                         <Item key="0">{t('Off')}</Item>
                     </Picker>
-                </Flex>
-            </Flex>
-            <Flex direction="row" justifyContent="space-between" marginBottom="size-300">
-                <Text>{t('Language')}</Text>
+                </div>
+            </div>
+            <div className="fr-settings-row">
+                <div className="fr-settings-label">
+                    <Text>{t('Language')}</Text>
+                </div>
                 <RadioGroup
                     orientation="horizontal"
                     value={configData.current.language}
@@ -129,8 +131,8 @@ function SettingsPanel({configData, onConfigChange}: SettingsPanelProps) {
                     <Radio value="cn">中文</Radio>
                     <Radio value="en">English</Radio>
                 </RadioGroup>
-            </Flex>
-        </Flex>
+            </div>
+        </div>
     )
 }
 
