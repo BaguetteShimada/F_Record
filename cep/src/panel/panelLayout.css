@@ -1,0 +1,187 @@
+.fr-panel-shell,
+.fr-panel-shell * {
+  min-width: 0;
+}
+
+.fr-panel-shell {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 100%;
+  padding: 0 12px;
+  overflow-x: hidden;
+}
+
+.fr-panel-shell *,
+.fr-panel-shell *::before,
+.fr-panel-shell *::after {
+  box-sizing: border-box;
+}
+
+.fr-tabs {
+  width: 100%;
+  max-width: 100%;
+}
+
+.fr-tabs [role="tablist"],
+.fr-tabs [role="tab"],
+.fr-tabs [role="tabpanel"] {
+  max-width: 100%;
+}
+
+.fr-tab-label {
+  white-space: nowrap;
+}
+
+.fr-dashboard {
+  width: 100%;
+  min-width: 0;
+  padding: 8px 0 0;
+}
+
+.fr-dashboard-toolbar {
+  display: grid;
+  grid-template-columns: minmax(120px, 1fr) auto;
+  align-items: center;
+  column-gap: 12px;
+  margin-bottom: 32px;
+}
+
+.fr-dashboard-section {
+  display: grid;
+  row-gap: 12px;
+  margin-bottom: 32px;
+}
+
+.fr-data-row {
+  display: grid;
+  grid-template-columns: minmax(116px, 34%) minmax(0, 1fr);
+  align-items: center;
+  column-gap: 12px;
+  min-width: 0;
+}
+
+.fr-row-label {
+  display: inline-flex;
+  align-items: center;
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.fr-row-label svg {
+  flex: 0 0 auto;
+  margin-right: 8px;
+}
+
+.fr-row-value {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  width: 100%;
+  min-width: 0;
+}
+
+.fr-row-value .spectrum-Textfield,
+.fr-settings-folder-row .spectrum-Textfield {
+  width: 100%;
+  min-width: 0;
+}
+
+.fr-process-folder-button {
+  flex: 0 0 auto;
+  margin-right: 8px;
+}
+
+.fr-github-row {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 32px;
+}
+
+.fr-export-progress {
+  min-width: 128px;
+  width: min(220px, 100%);
+}
+
+.fr-settings {
+  width: 100%;
+  min-width: 0;
+  padding: 8px 0 0;
+}
+
+.fr-settings-section {
+  display: grid;
+  row-gap: 12px;
+  margin-bottom: 24px;
+}
+
+.fr-settings-folder-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  column-gap: 8px;
+  min-width: 0;
+}
+
+.fr-settings-row {
+  display: grid;
+  grid-template-columns: minmax(128px, 1fr) auto;
+  align-items: center;
+  column-gap: 12px;
+  min-width: 0;
+}
+
+.fr-settings-label {
+  display: inline-flex;
+  align-items: center;
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.fr-settings-label > span:first-child {
+  min-width: 0;
+}
+
+@media (max-width: 360px) {
+  .fr-panel-shell {
+    padding: 0 8px;
+  }
+
+  .fr-dashboard-toolbar {
+    grid-template-columns: 1fr;
+    row-gap: 12px;
+    justify-items: start;
+  }
+
+  .fr-dashboard-toolbar > :last-child {
+    justify-self: stretch;
+  }
+
+  .fr-data-row {
+    grid-template-columns: 1fr;
+    row-gap: 6px;
+  }
+
+  .fr-row-value {
+    justify-content: stretch;
+  }
+
+  .fr-settings-row {
+    grid-template-columns: 1fr;
+    row-gap: 6px;
+  }
+
+  .fr-settings-row > :last-child {
+    justify-self: stretch;
+  }
+}
+
+@media (max-width: 520px) {
+  .fr-tab-label {
+    display: none;
+  }
+}

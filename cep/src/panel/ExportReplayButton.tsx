@@ -179,7 +179,12 @@ function ExportReplayButton({
                     )}
                 </DialogTrigger>
             ) : (
-                <ProgressBar value={progress.percent} label={t(progress.status)} width="size-2400" />
+                <ProgressBar
+                    value={progress.percent}
+                    label={t(progress.status)}
+                    width="100%"
+                    UNSAFE_className="fr-export-progress"
+                />
             )}
         </>
     );

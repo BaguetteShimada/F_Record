@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Flex, Item, Provider, TabList, TabPanels, Tabs, Text, darkTheme, ToastContainer, ToastQueue } from '@adobe/react-spectrum';
+import { Item, Provider, TabList, TabPanels, Tabs, Text, darkTheme, ToastContainer, ToastQueue } from '@adobe/react-spectrum';
 import Settings from '@spectrum-icons/workflow/Settings';
 import MovieCamera from '@spectrum-icons/workflow/MovieCamera';
 import DashboardPanel from './DashboardPanel';
@@ -73,16 +73,16 @@ function Panel() {
     return (
         <Provider theme={theme}>
             <ToastContainer placement="bottom" />
-            <Flex justifyContent="center" marginX="size-200">
-                <Tabs aria-label="Tab of Panel">
+            <div className="fr-panel-shell">
+                <Tabs aria-label="Tab of Panel" width="100%" UNSAFE_className="fr-tabs">
                     <TabList>
-                        <Item key="Dashboard Panel">
+                        <Item key="Dashboard Panel" textValue={t('Dashboard')}>
                             <MovieCamera />
-                            <Text>{t('Dashboard')}</Text>
+                            <Text UNSAFE_className="fr-tab-label">{t('Dashboard')}</Text>
                         </Item>
-                        <Item key="Settings Panel">
+                        <Item key="Settings Panel" textValue={t('Settings')}>
                             <Settings />
-                            <Text>{t('Settings')}</Text>
+                            <Text UNSAFE_className="fr-tab-label">{t('Settings')}</Text>
                         </Item>
                     </TabList>
                     <TabPanels>
@@ -94,7 +94,7 @@ function Panel() {
                         </Item>
                     </TabPanels>
                 </Tabs>
-            </Flex>
+            </div>
         </Provider>
     );
 };
