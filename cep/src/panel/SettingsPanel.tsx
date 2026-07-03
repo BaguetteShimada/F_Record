@@ -7,6 +7,12 @@ import { applyLanguageChange } from './settingsLanguageActions';
 import { applySettingsStringConfigChange } from './settingsConfigActions';
 import SettingsPickerRow from './SettingsPickerRow';
 import SettingsFolderSection from './SettingsFolderSection';
+import {
+    IDLE_TIMEOUT_MINUTE_OPTIONS,
+    LANGUAGE_OPTIONS,
+    QUALITY_OPTIONS,
+    RESOLUTION_OPTIONS,
+} from './settingsOptions';
 
 interface SettingsPanelProps {
     configData: React.MutableRefObject<ConfigData>;
@@ -36,10 +42,9 @@ function SettingsPanel({configData, onConfigChange}: SettingsPanelProps) {
                         applySettingsStringConfigChange('resolution', key, onConfigChange);
                     }}
                 >
-                    <Item key="360">360p</Item>
-                    <Item key="720">720p</Item>
-                    <Item key="1080">1080p</Item>
-                    <Item key="1440">1440p</Item>
+                    {RESOLUTION_OPTIONS.map((resolution) => (
+                        <Item key={resolution}>{resolution}p</Item>
+                    ))}
                 </SettingsPickerRow>
                 <SettingsPickerRow
                     label={t('Quality')}
@@ -50,9 +55,9 @@ function SettingsPanel({configData, onConfigChange}: SettingsPanelProps) {
                     }}
                     helpText={t('The higher the Quality you select, the lower the compression rate applied to the image.')}
                 >
-                    <Item key="20">{t('low')}</Item>
-                    <Item key="70">{t('medium')}</Item>
-                    <Item key="90">{t('high')}</Item>
+                    {QUALITY_OPTIONS.map((option) => (
+                        <Item key={option.key}>{t(option.labelKey)}</Item>
+                    ))}
                 </SettingsPickerRow>
                 <SettingsPickerRow
                     label={t('Idle Timeout')}
@@ -63,11 +68,12 @@ function SettingsPanel({configData, onConfigChange}: SettingsPanelProps) {
                     }}
                     helpText={t('When the time elapsed since the last painting exceeds the preset duration, the timer will automatically stop.')}
                 >
-                    <Item key="1">{1 + t('min')}</Item>
-                    <Item key="5">{5 + t('min')}</Item>
-                    <Item key="10">{10 + t('min')}</Item>
-                    <Item key="30">{30 + t('min')}</Item>
-                    <Item key="0">{t('Off')}</Item>
+                    {[
+                        ...IDLE_TIMEOUT_MINUTE_OPTIONS.map((minutes) => (
+                            <Item key={String(minutes)}>{minutes + t('min')}</Item>
+                        )),
+                        <Item key="0">{t('Off')}</Item>,
+                    ]}
                 </SettingsPickerRow>
             </div>
             <SettingsPickerRow
@@ -78,8 +84,9 @@ function SettingsPanel({configData, onConfigChange}: SettingsPanelProps) {
                     applyLanguageChange(String(key), i18n, onConfigChange);
                 }}
             >
-                <Item key="cn">中文</Item>
-                <Item key="en">English</Item>
+                {LANGUAGE_OPTIONS.map((option) => (
+                    <Item key={option.key}>{option.label}</Item>
+                ))}
             </SettingsPickerRow>
         </div>
     )
