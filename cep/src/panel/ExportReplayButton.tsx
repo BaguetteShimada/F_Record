@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Button, Content, Dialog, DialogTrigger, Flex, Item, Picker, ProgressBar, Text, ToastQueue } from '@adobe/react-spectrum';
+import { Button, Content, Dialog, DialogTrigger, Flex, Item, Picker, Text, ToastQueue } from '@adobe/react-spectrum';
 import Replay from '@spectrum-icons/workflow/Replay';
 import { useTranslation } from 'react-i18next';
 import { FPS } from './constants';
@@ -15,6 +15,7 @@ import {
 } from './exportSettingsActions';
 import { ASPECT_RATIO_OPTIONS } from './exportDialogOptions';
 import { applyExportStringOptionChange } from './exportOptionActions';
+import ExportProgressBar from './ExportProgressBar';
 
 interface ExportReplayButtonProps {
     configData: React.MutableRefObject<ConfigData>;
@@ -147,12 +148,7 @@ function ExportReplayButton({
                     )}
                 </DialogTrigger>
             ) : (
-                <ProgressBar
-                    value={progress.percent}
-                    label={t(progress.status)}
-                    width="100%"
-                    UNSAFE_className="fr-export-progress"
-                />
+                <ExportProgressBar progress={progress} label={t(progress.status)} />
             )}
         </>
     );
