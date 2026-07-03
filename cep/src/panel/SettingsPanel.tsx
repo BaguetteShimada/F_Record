@@ -1,13 +1,11 @@
 import * as React from 'react';
-import { TextField, Tooltip, TooltipTrigger } from "@adobe/react-spectrum";
-import { Text } from "@adobe/react-spectrum";
-import { ActionButton, Item } from "@adobe/react-spectrum";
-import FolderOpen from '@spectrum-icons/workflow/FolderOpen';
+import { Item } from "@adobe/react-spectrum";
 import { useTranslation } from 'react-i18next';
 import type { ConfigData } from './models';
 import { selectProcessImageFolder } from './settingsFolderActions';
 import { applyLanguageChange } from './settingsLanguageActions';
 import SettingsPickerRow from './SettingsPickerRow';
+import SettingsFolderSection from './SettingsFolderSection';
 
 interface SettingsPanelProps {
     configData: React.MutableRefObject<ConfigData>;
@@ -19,28 +17,15 @@ function SettingsPanel({configData, onConfigChange}: SettingsPanelProps) {
 
     return(
         <div className="fr-settings">
-            <div className="fr-settings-section">
-                <Text marginBottom="size-100">{t('Process Image Folder')}</Text>
-                <div className="fr-settings-folder-row">
-                    <TextField
-                        aria-label="Process Image Folder"
-                        value={configData.current.processImageFolderPath}
-                        isReadOnly
-                        width="100%"
-                    />
-                    <TooltipTrigger delay={0}>
-                        <ActionButton
-                            aria-label="Select Process Image Folder"
-                            onPress={() => {
-                                selectProcessImageFolder(configData.current.processImageFolderPath, t("Select Process Image Folder"), onConfigChange);
-                            }}
-                            >
-                            <FolderOpen />
-                            </ActionButton>
-                        <Tooltip>{t('select folder')}</Tooltip>
-                    </TooltipTrigger>
-                </div>
-            </div>
+            <SettingsFolderSection
+                label={t('Process Image Folder')}
+                value={configData.current.processImageFolderPath}
+                buttonLabel="Select Process Image Folder"
+                tooltipLabel={t('select folder')}
+                onSelectFolder={() => {
+                    selectProcessImageFolder(configData.current.processImageFolderPath, t("Select Process Image Folder"), onConfigChange);
+                }}
+            />
             <div className="fr-settings-section">
                 <SettingsPickerRow
                     label={t('Resolution')}
