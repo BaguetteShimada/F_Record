@@ -29,17 +29,44 @@
 }
 
 .fr-tabs [role="tablist"] {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   min-height: 36px;
+  padding: 4px 0 8px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.16);
 }
 
 .fr-tabs [role="tab"] {
   display: inline-flex;
   align-items: center;
+  column-gap: 6px;
   min-width: 0;
+  min-height: 30px;
+  padding: 4px 10px;
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.06);
+  line-height: 1;
+  cursor: pointer;
+}
+
+.fr-tabs [role="tab"][aria-selected="true"] {
+  border-color: rgba(255, 255, 255, 0.48);
+  background: rgba(255, 255, 255, 0.16);
+}
+
+.fr-tabs [role="tab"]:hover {
+  background: rgba(255, 255, 255, 0.12);
 }
 
 .fr-tab-label {
   white-space: nowrap;
+}
+
+.fr-tabs [role="tab"] svg,
+.fr-tabs [role="tab"] .spectrum-Icon {
+  margin-right: 2px;
 }
 
 .fr-tabs [role="tab"] svg,
@@ -177,6 +204,8 @@
   grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
   column-gap: 8px;
+  width: 100%;
+  max-width: 336px;
   min-width: 0;
 }
 
