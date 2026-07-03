@@ -1,13 +1,13 @@
 import * as React from 'react';
-import { TextField, Tooltip, TooltipTrigger, ContextualHelp, Content } from "@adobe/react-spectrum";
+import { TextField, Tooltip, TooltipTrigger } from "@adobe/react-spectrum";
 import { Text } from "@adobe/react-spectrum";
-import { Picker } from "@adobe/react-spectrum";
 import { ActionButton, Item } from "@adobe/react-spectrum";
 import FolderOpen from '@spectrum-icons/workflow/FolderOpen';
 import { useTranslation } from 'react-i18next';
 import type { ConfigData } from './models';
 import { selectProcessImageFolder } from './settingsFolderActions';
 import { applyLanguageChange } from './settingsLanguageActions';
+import SettingsPickerRow from './SettingsPickerRow';
 
 interface SettingsPanelProps {
     configData: React.MutableRefObject<ConfigData>;
@@ -42,91 +42,65 @@ function SettingsPanel({configData, onConfigChange}: SettingsPanelProps) {
                 </div>
             </div>
             <div className="fr-settings-section">
-                <div className="fr-settings-row">
-                    <div className="fr-settings-label">
-                        <Text>{t('Resolution')}</Text>
-                    </div>
-                    <Picker aria-label="Resolution"
-                        selectedKey={configData.current.resolution}
-                        onSelectionChange={(key) => {
-                            onConfigChange({
-                                resolution: String(key)
-                            });
-                        }}
-                        width="size-1200">
-                        <Item key="360">360p</Item>
-                        <Item key="720">720p</Item>
-                        <Item key="1080">1080p</Item>
-                        <Item key="1440">1440p</Item>
-                    </Picker>
-                </div>
-                <div className="fr-settings-row">
-                    <div className="fr-settings-label">
-                        <Text marginEnd="size-100">{t('Quality')}</Text>
-                        <ContextualHelp variant="help" placement="top start">
-                            <Content>
-                                <Text>
-                                    {t('The higher the Quality you select, the lower the compression rate applied to the image.')}
-                                </Text>
-                            </Content>
-                        </ContextualHelp>
-                    </div>
-                    <Picker aria-label="Quality"
-                        selectedKey={configData.current.quality}
-                        onSelectionChange={(key) => {
-                            onConfigChange({
-                                quality: String(key)
-                            });
-                        }}
-                        width="size-1200">
-                        <Item key="20">{t('low')}</Item>
-                        <Item key="70">{t('medium')}</Item>
-                        <Item key="90">{t('high')}</Item>
-                    </Picker>
-                </div>
-                <div className="fr-settings-row">
-                    <div className="fr-settings-label">
-                        <Text marginEnd="size-100">{t('Idle Timeout')}</Text>
-                        <ContextualHelp variant="help" placement="top start">
-                            <Content>
-                                <Text>
-                                    {t('When the time elapsed since the last painting exceeds the preset duration, the timer will automatically stop.')}
-                                </Text>
-                            </Content>
-                        </ContextualHelp>
-                    </div>
-                    <Picker aria-label="Idle Timeout"
-                        selectedKey={configData.current.idleTimeout}
-                        onSelectionChange={(key) => {
-                            onConfigChange({
-                                idleTimeout: String(key)
-                            });
-                        }}
-                        width="size-1200">
-                        <Item key="1">{1 + t('min')}</Item>
-                        <Item key="5">{5 + t('min')}</Item>
-                        <Item key="10">{10 + t('min')}</Item>
-                        <Item key="30">{30 + t('min')}</Item>
-                        <Item key="0">{t('Off')}</Item>
-                    </Picker>
-                </div>
-            </div>
-            <div className="fr-settings-row">
-                <div className="fr-settings-label">
-                    <Text>{t('Language')}</Text>
-                </div>
-                <Picker
-                    aria-label="Language"
-                    selectedKey={configData.current.language}
+                <SettingsPickerRow
+                    label={t('Resolution')}
+                    ariaLabel="Resolution"
+                    selectedKey={configData.current.resolution}
                     onSelectionChange={(key) => {
-                        applyLanguageChange(String(key), i18n, onConfigChange);
+                        onConfigChange({
+                            resolution: String(key)
+                        });
                     }}
-                    width="size-1200"
                 >
-                    <Item key="cn">中文</Item>
-                    <Item key="en">English</Item>
-                </Picker>
+                    <Item key="360">360p</Item>
+                    <Item key="720">720p</Item>
+                    <Item key="1080">1080p</Item>
+                    <Item key="1440">1440p</Item>
+                </SettingsPickerRow>
+                <SettingsPickerRow
+                    label={t('Quality')}
+                    ariaLabel="Quality"
+                    selectedKey={configData.current.quality}
+                    onSelectionChange={(key) => {
+                        onConfigChange({
+                            quality: String(key)
+                        });
+                    }}
+                    helpText={t('The higher the Quality you select, the lower the compression rate applied to the image.')}
+                >
+                    <Item key="20">{t('low')}</Item>
+                    <Item key="70">{t('medium')}</Item>
+                    <Item key="90">{t('high')}</Item>
+                </SettingsPickerRow>
+                <SettingsPickerRow
+                    label={t('Idle Timeout')}
+                    ariaLabel="Idle Timeout"
+                    selectedKey={configData.current.idleTimeout}
+                    onSelectionChange={(key) => {
+                        onConfigChange({
+                            idleTimeout: String(key)
+                        });
+                    }}
+                    helpText={t('When the time elapsed since the last painting exceeds the preset duration, the timer will automatically stop.')}
+                >
+                    <Item key="1">{1 + t('min')}</Item>
+                    <Item key="5">{5 + t('min')}</Item>
+                    <Item key="10">{10 + t('min')}</Item>
+                    <Item key="30">{30 + t('min')}</Item>
+                    <Item key="0">{t('Off')}</Item>
+                </SettingsPickerRow>
             </div>
+            <SettingsPickerRow
+                label={t('Language')}
+                ariaLabel="Language"
+                selectedKey={configData.current.language}
+                onSelectionChange={(key) => {
+                    applyLanguageChange(String(key), i18n, onConfigChange);
+                }}
+            >
+                <Item key="cn">中文</Item>
+                <Item key="en">English</Item>
+            </SettingsPickerRow>
         </div>
     )
 }
