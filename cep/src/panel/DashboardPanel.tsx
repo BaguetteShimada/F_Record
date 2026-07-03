@@ -11,6 +11,7 @@ import { useTranslation } from 'react-i18next';
 import path from 'path-browserify';
 import type { ConfigData, CurrentDocumentValue, ExportProgress, ExportSettings } from './models';
 import { formatElapsedTime } from './timeFormatting';
+import { GITHUB_REPOSITORY_URL, openExternalUrl } from './externalLinks';
 
 function GitHubIcon() {
     return (
@@ -51,14 +52,6 @@ function DashboardPanel({
 }: DashboardPanelProps) {
     const { t } = useTranslation();
 
-    const openExternalLink = (url: string) => {
-        try {
-            window.cep.util.openURLInDefaultBrowser(url);
-        } catch (error) {
-            onError(error);
-        }
-    };
-    
     return(
         <div className="fr-dashboard">
             <div className="fr-dashboard-toolbar">
@@ -152,7 +145,7 @@ function DashboardPanel({
                     <ActionButton
                         aria-label="GitHub"
                         onPress={() => {
-                            openExternalLink("https://github.com/BaguetteShimada/F_Record");
+                            openExternalUrl(GITHUB_REPOSITORY_URL, onError);
                         }}
                         UNSAFE_className="fr-github-button"
                     >
