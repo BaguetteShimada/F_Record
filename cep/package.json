@@ -5,7 +5,7 @@
   "scripts": {
     "build": "webpack --config webpack.cep.config.js --mode production",
     "typecheck": "tsc --project tsconfig.cep.json --noEmit",
-    "test": "node test/exportReplayUtils.test.js && node test/exportReplayWorker.test.js && node test/storage.test.js && node test/localPathOpener.test.js"
+    "test": "node test/exportReplayUtils.test.js && node test/exportReplayWorker.test.js && node test/storage.test.js && node test/localPathOpener.test.js && node test/toastContainer.test.js"
   },
   "dependencies": {
     "@adobe/react-spectrum": "^3.40.0",
