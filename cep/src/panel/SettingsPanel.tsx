@@ -6,6 +6,7 @@ import { ActionButton, Item } from "@adobe/react-spectrum";
 import FolderOpen from '@spectrum-icons/workflow/FolderOpen';
 import { useTranslation } from 'react-i18next';
 import type { ConfigData } from './models';
+import { selectProcessImageFolder } from './settingsFolderActions';
 
 interface SettingsPanelProps {
     configData: React.MutableRefObject<ConfigData>;
@@ -30,12 +31,7 @@ function SettingsPanel({configData, onConfigChange}: SettingsPanelProps) {
                         <ActionButton
                             aria-label="Select Process Image Folder"
                             onPress={() => {
-                                const result = window.cep.fs.showOpenDialog(false, true, t("Select Process Image Folder"), configData.current.processImageFolderPath);
-                                if (result.err === 0 && result.data.length > 0) {
-                                    onConfigChange({
-                                        processImageFolderPath: result.data[0]
-                                    });
-                                }
+                                selectProcessImageFolder(configData.current.processImageFolderPath, t("Select Process Image Folder"), onConfigChange);
                             }}
                             >
                             <FolderOpen />
