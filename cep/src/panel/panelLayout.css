@@ -258,7 +258,15 @@ body {
   grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
   column-gap: 8px;
-  max-width: 360px;
+  justify-self: start;
+  width: 100%;
+  max-width: 336px;
+  min-width: 0;
+}
+
+.fr-document-value .spectrum-Textfield {
+  width: 100%;
+  min-width: 0;
 }
 
 .fr-document-folder-button {
