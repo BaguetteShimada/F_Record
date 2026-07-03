@@ -10,6 +10,7 @@ import DocumentOutline from '@spectrum-icons/workflow/DocumentOutline';
 import { useTranslation } from 'react-i18next';
 import path from 'path-browserify';
 import type { ConfigData, CurrentDocumentValue, ExportProgress, ExportSettings } from './models';
+import { formatElapsedTime } from './timeFormatting';
 
 function GitHubIcon() {
     return (
@@ -56,20 +57,6 @@ function DashboardPanel({
         }
     };
     
-    const formatTime = () => {
-        const timeSpent = documentValue.timeSpent ?? 0;
-        const hours = Math.floor(timeSpent / 3600);
-        const minutes = Math.floor((timeSpent % 3600) / 60);
-        const seconds = timeSpent % 60;
-        if (hours > 0) {
-            return `${hours}${t('h')} ${minutes}${t('m')}`;
-        } else if (minutes > 0) {
-            return `${minutes}${t('m')} ${seconds}${t('s')}`;
-        } else {
-            return `${seconds}${t('s')}`;
-        }
-    }
-
     return(
         <div className="fr-dashboard">
             <div className="fr-dashboard-toolbar">
@@ -148,7 +135,11 @@ function DashboardPanel({
                     <div className="fr-row-value">
                         <TextField
                             width="100%"
-                            value={documentValue.id ? formatTime() : ""}
+                            value={documentValue.id ? formatElapsedTime(documentValue.timeSpent, {
+                                hours: t('h'),
+                                minutes: t('m'),
+                                seconds: t('s'),
+                            }) : ""}
                             isReadOnly
                         />
                     </div>
