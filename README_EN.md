@@ -12,6 +12,8 @@ https://github.com/user-attachments/assets/0221cee9-ac70-48d1-b85a-b85667813b90
 
 **Supported Photoshop Versions**: Photoshop 2022 ~ 2025
 
+**Manual Validation Checklist**: [docs/manual-validation.md](./docs/manual-validation.md)
+
 ## Installation
 
 1. Install ffmpeg, and make sure `ffmpeg` and `ffprobe` can be run from the system environment.
