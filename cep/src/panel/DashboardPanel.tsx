@@ -84,7 +84,7 @@ function DashboardPanel({
                         <DocumentOutline size="S" />
                         <Text>{t('Document')}</Text>
                     </div>
-                    <div className="fr-row-value fr-document-value">
+                    <div className="fr-document-value">
                         <TextField
                             width="100%"
                             value={documentValue.id ? documentValue.name || "" : ""}
