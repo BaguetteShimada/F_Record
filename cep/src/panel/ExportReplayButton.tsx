@@ -8,6 +8,11 @@ import { estimateReplayDurationSeconds, getReplayDurationPresetSeconds } from '.
 import { prepareExportReplayParams, runPreparedExportReplay } from './exportReplayService';
 import { getExportFailureMessageDescriptor } from './exportErrors';
 import { selectExportSavePath } from './exportSaveDialog';
+import {
+    createFinishExportSettingsChange,
+    createStartedExportSettings,
+    createStartExportSettingsChange,
+} from './exportSettingsActions';
 
 interface ExportReplayButtonProps {
     configData: React.MutableRefObject<ConfigData>;
@@ -42,15 +47,8 @@ function ExportReplayButton({
     const clickConfirm = async (close: () => void) => {
         const savePath = selectExportSavePath(documentValue.name, t("Select Export Path"));
         if (savePath !== null) {
-            const nextExportSettings = {
-                ...exportSettings.current,
-                savePath: savePath,
-                isExporting: true,
-            };
-            onExportSettingsChange({
-                savePath: savePath,
-                isExporting: true,
-            });
+            const nextExportSettings = createStartedExportSettings(exportSettings.current, savePath);
+            onExportSettingsChange(createStartExportSettingsChange(savePath));
             close();
             
             setProgress({
@@ -81,9 +79,7 @@ function ExportReplayButton({
                     onAction: () => showError(error)
                 });
             } finally {
-                onExportSettingsChange({
-                    isExporting: false
-                });
+                onExportSettingsChange(createFinishExportSettingsChange());
             }
         }
     };
