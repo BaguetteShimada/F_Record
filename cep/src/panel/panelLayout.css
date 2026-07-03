@@ -73,8 +73,8 @@
 .fr-tabs [role="tab"] .spectrum-Icon,
 .fr-row-label svg,
 .fr-row-label .spectrum-Icon,
-.fr-process-folder-button svg,
-.fr-process-folder-button .spectrum-Icon,
+.fr-document-folder-button svg,
+.fr-document-folder-button .spectrum-Icon,
 .fr-export-button svg,
 .fr-export-button .spectrum-Icon {
   flex: 0 0 18px;
@@ -170,9 +170,16 @@
   min-width: 0;
 }
 
-.fr-process-folder-button {
+.fr-document-value {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  column-gap: 8px;
+  max-width: 360px;
+}
+
+.fr-document-folder-button {
   flex: 0 0 auto;
-  margin-right: 8px;
 }
 
 .fr-community-links {
