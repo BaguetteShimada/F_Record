@@ -116,8 +116,9 @@
   margin-right: 8px;
 }
 
-.fr-github-row {
+.fr-community-links {
   display: flex;
+  gap: 16px;
   justify-content: flex-end;
   margin-bottom: 32px;
 }

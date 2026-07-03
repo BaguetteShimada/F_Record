@@ -10,14 +10,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/F-know/F_Record.git"
+    "url": "git+https://github.com/BaguetteShimada/F_Record.git"
   },
   "author": "F_know",
   "license": "GPL-3.0-only",
   "bugs": {
-    "url": "https://github.com/F-know/F_Record/issues"
+    "url": "https://github.com/BaguetteShimada/F_Record/issues"
   },
-  "homepage": "https://github.com/F-know/F_Record#readme",
+  "homepage": "https://github.com/BaguetteShimada/F_Record#readme",
   "dependencies": {
     "adm-zip": "^0.5.16"
   }
