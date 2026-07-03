@@ -13,6 +13,7 @@ import {
     createStartedExportSettings,
     createStartExportSettingsChange,
 } from './exportSettingsActions';
+import { ASPECT_RATIO_OPTIONS } from './exportDialogOptions';
 
 interface ExportReplayButtonProps {
     configData: React.MutableRefObject<ConfigData>;
@@ -110,12 +111,11 @@ function ExportReplayButton({
                                                 });
                                             }}
                                             width="size-1600">
-                                            <Item key="1.7778">16:9</Item>
-                                            <Item key="1.3333">4:3</Item>
-                                            <Item key="1">1:1</Item>
-                                            <Item key="0.75">3:4</Item>
-                                            <Item key="0.5625">9:16</Item>
-                                            <Item key="0">{t('match canvas')}</Item>
+                                            {ASPECT_RATIO_OPTIONS.map((option) => (
+                                                <Item key={option.key}>
+                                                    {'labelKey' in option ? t(option.labelKey) : option.label}
+                                                </Item>
+                                            ))}
                                         </Picker>
                                     </Flex>
                                     <Flex direction="row" justifyContent="space-between" marginBottom="size-300">
