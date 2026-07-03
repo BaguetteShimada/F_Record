@@ -7,7 +7,6 @@ import { createDefaultExportProgress } from './models';
 import type { ConfigData, CurrentDocumentValue, ExportProgress, ExportSettings } from './models';
 import { getReplayDurationOptions } from './exportDurationOptions';
 import { prepareExportReplayParams, runPreparedExportReplay } from './exportReplayService';
-import { getExportFailureMessageDescriptor } from './exportErrors';
 import { selectExportSavePath } from './exportSaveDialog';
 import {
     createFinishExportSettingsChange,
@@ -17,6 +16,7 @@ import {
 import ExportProgressBar from './ExportProgressBar';
 import ExportReplayDialog from './ExportReplayDialog';
 import { openExportedVideo } from './exportVideoActions';
+import { showExportFailureToast, showExportStartedToast, showExportSuccessToast } from './exportNotifications';
 
 interface ExportReplayButtonProps {
     configData: React.MutableRefObject<ConfigData>;
@@ -41,11 +41,6 @@ function ExportReplayButton({
 
     const durationOptions = getReplayDurationOptions(documentValue.count, FPS);
 
-    const getExportFailureMessage = (error: unknown): string => {
-        const message = getExportFailureMessageDescriptor(error);
-        return t(message.key, message.values);
-    };
-
     const clickConfirm = async (close: () => void) => {
         const savePath = selectExportSavePath(documentValue.name, t("Select Export Path"));
         if (savePath !== null) {
@@ -54,7 +49,7 @@ function ExportReplayButton({
             close();
             
             setProgress(createDefaultExportProgress());
-            ToastQueue.info(t('Start to export'), {timeout: 5000});
+            showExportStartedToast(t, ToastQueue);
             
 
             try {
@@ -62,15 +57,9 @@ function ExportReplayButton({
                 await runPreparedExportReplay(exportParams, (nowProgress) => {
                     setProgress(nowProgress);
                 });
-                ToastQueue.positive(t('Export success'), {
-                    actionLabel: t('Open'),
-                    onAction: () => openExportedVideo(savePath, onError)
-                });
+                showExportSuccessToast(t, ToastQueue, () => openExportedVideo(savePath, onError));
             } catch (error) {
-                ToastQueue.negative(getExportFailureMessage(error), {
-                    actionLabel: t('Details'),
-                    onAction: () => showError(error)
-                });
+                showExportFailureToast(error, t, ToastQueue, () => showError(error));
             } finally {
                 onExportSettingsChange(createFinishExportSettingsChange());
             }
