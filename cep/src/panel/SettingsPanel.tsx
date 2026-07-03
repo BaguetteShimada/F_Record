@@ -7,6 +7,7 @@ import FolderOpen from '@spectrum-icons/workflow/FolderOpen';
 import { useTranslation } from 'react-i18next';
 import type { ConfigData } from './models';
 import { selectProcessImageFolder } from './settingsFolderActions';
+import { applyLanguageChange } from './settingsLanguageActions';
 
 interface SettingsPanelProps {
     configData: React.MutableRefObject<ConfigData>;
@@ -118,11 +119,7 @@ function SettingsPanel({configData, onConfigChange}: SettingsPanelProps) {
                     aria-label="Language"
                     selectedKey={configData.current.language}
                     onSelectionChange={(key) => {
-                        const value = String(key);
-                        i18n.changeLanguage(value);
-                        onConfigChange({
-                            language: value
-                        });
+                        applyLanguageChange(String(key), i18n, onConfigChange);
                     }}
                     width="size-1200"
                 >
