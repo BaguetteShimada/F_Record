@@ -4,21 +4,14 @@ const {
 } = require("./documentStore");
 const { createDefaultDocumentValue } = require("./models");
 const { applyTimeSpentTick } = require("./recordingLogic");
+const { getTimeSpentUpdateSkipReason } = require("./timeSpentEligibility");
 
 async function updateDocumentTimeSpent(options) {
     const configData = options.configData;
     const nowDocument = options.nowDocument;
-    if (configData === null || nowDocument === null) {
-        return { updated: false, reason: "not-ready" };
-    }
-    if (configData.isEnabled === false) {
-        return { updated: false, reason: "disabled" };
-    }
-    if (nowDocument.id === null || nowDocument.createTime === null) {
-        return { updated: false, reason: "no-document" };
-    }
-    if (!hasDocumentValue(nowDocument.createTime)) {
-        return { updated: false, reason: "missing-document-value" };
+    const skipReason = getTimeSpentUpdateSkipReason(configData, nowDocument, hasDocumentValue);
+    if (skipReason !== null) {
+        return { updated: false, reason: skipReason };
     }
 
     const nowMsFactory = options.nowMsFactory || (() => new Date().getTime());
