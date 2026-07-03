@@ -14,6 +14,7 @@ import { showExportFailureToast, showExportStartedToast, showExportSuccessToast 
 import { runExportReplayFlow } from './exportReplayFlow';
 import { createExportReplayStart } from './exportStartActions';
 import { isExportReplayDisabled } from './exportAvailability';
+import { showExportErrorDetails } from './exportErrorDetailsActions';
 
 interface ExportReplayButtonProps {
     configData: React.MutableRefObject<ConfigData>;
@@ -54,7 +55,7 @@ function ExportReplayButton({
                 });
                 showExportSuccessToast(t, ToastQueue, () => openExportedVideo(exportStart.savePath, onError));
             } catch (error) {
-                showExportFailureToast(error, t, ToastQueue, () => showError(error));
+                showExportFailureToast(error, t, ToastQueue, () => showExportErrorDetails(error, onError));
             } finally {
                 onExportSettingsChange(createFinishExportSettingsChange());
             }
