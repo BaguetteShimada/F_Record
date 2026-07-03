@@ -1,7 +1,7 @@
 const fs = require("fs");
 const path = require('path');
 const writeFileAtomic = require('write-file-atomic');
-const { exec } = require('child_process');
+const { openLocalPathWithExecFile } = require(path.join(__dirname, 'js', 'localPathOpener.js'));
 const { runExportReplayWorker } = require(path.join(__dirname, 'js', 'exportReplayWorker.js'));
 const { resolveExportBinaries } = require(path.join(__dirname, 'js', 'exportReplayUtils.js'));
 const cs = new CSInterface();
@@ -44,11 +44,7 @@ function deleteDir(path) {
 }
 
 function openLocalPath(path) {
-    if (process.platform === 'win32') {
-        exec(`start "" "${path}"`);
-    } else {
-        exec(`open "${path}"`);
-    }
+    openLocalPathWithExecFile(path);
 }
 
 function showError(error) {
