@@ -8,7 +8,6 @@ import Clock from '@spectrum-icons/workflow/Clock';
 import Images from '@spectrum-icons/workflow/Images';
 import DocumentOutline from '@spectrum-icons/workflow/DocumentOutline';
 import { useTranslation } from 'react-i18next';
-import path from 'path-browserify';
 import type { ConfigData, CurrentDocumentValue, ExportProgress, ExportSettings } from './models';
 import { GITHUB_REPOSITORY_URL, openExternalUrl } from './externalLinks';
 import {
@@ -16,6 +15,7 @@ import {
     getImageCountDisplayValue,
     getTimeSpentDisplayValue,
 } from './dashboardValues';
+import { getProcessImageFolderPath } from './documentPaths';
 
 function GitHubIcon() {
     return (
@@ -98,7 +98,7 @@ function DashboardPanel({
                                     aria-label="Open Current Document Process Image Folder"
                                     onPress={() => {
                                         try {
-                                            openLocalPath(path.join(configData.current.processImageFolderPath, documentValue.createTime || ""));
+                                            openLocalPath(getProcessImageFolderPath(configData.current.processImageFolderPath, documentValue.createTime));
                                         } catch (error) {
                                             onError(error);
                                         }
