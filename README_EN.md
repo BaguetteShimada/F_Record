@@ -14,6 +14,8 @@ https://github.com/user-attachments/assets/0221cee9-ac70-48d1-b85a-b85667813b90
 
 **Manual Validation Checklist**: [docs/manual-validation.md](./docs/manual-validation.md)
 
+**Release Process**: [docs/release-process.md](./docs/release-process.md)
+
 ## Installation
 
 1. Install ffmpeg, and make sure `ffmpeg` and `ffprobe` can be run from the system environment.
