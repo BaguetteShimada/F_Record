@@ -1,6 +1,7 @@
 const assert = require("assert");
 const EventEmitter = require("events");
 const {
+    resolveNodeCommand,
     runExportReplayWorker,
     toWorkerError,
 } = require("../src/js/exportReplayWorker");
@@ -8,6 +9,14 @@ const {
 function createFakeWorker(onSend) {
     const worker = new EventEmitter();
     worker.sentMessages = [];
+    worker.disconnected = false;
+    worker.killed = false;
+    worker.disconnect = () => {
+        worker.disconnected = true;
+    };
+    worker.kill = () => {
+        worker.killed = true;
+    };
     worker.send = (message) => {
         worker.sentMessages.push(message);
         onSend(worker, message);
@@ -48,6 +57,8 @@ function createFakeWorker(onSend) {
         options: { stdio: ["pipe", "pipe", "pipe", "ipc"] },
     }]);
     assert.deepStrictEqual(successWorker.sentMessages, [{ job: "export" }]);
+    assert.strictEqual(successWorker.disconnected, true);
+    assert.strictEqual(successWorker.killed, true);
     assert.deepStrictEqual(progress, [{ status: "loading image...", percent: 10 }]);
 
     await assert.rejects(
@@ -144,6 +155,35 @@ function createFakeWorker(onSend) {
     assert.strictEqual(restoredError.code, "FFMPEG");
 
     assert.strictEqual(toWorkerError({}).message, "Export worker failed");
+
+    assert.strictEqual(
+        resolveNodeCommand({
+            env: { F_RECORD_NODE_PATH: `"C:\\Tools\\node.exe"` },
+            platform: "win32",
+        }),
+        "C:\\Tools\\node.exe",
+    );
+
+    const fakeFiles = new Set([
+        "C:\\Program Files\\Adobe\\Adobe Photoshop 2022\\node.exe",
+    ]);
+    const fakeFs = {
+        statSync(filePath) {
+            if (fakeFiles.has(filePath)) {
+                return { isFile: () => true };
+            }
+            throw new Error("not found");
+        },
+    };
+    assert.strictEqual(
+        resolveNodeCommand({
+            baseDir: "C:\\Program Files\\Adobe\\Adobe Photoshop 2022\\Required\\CEP\\extensions\\com.f_know.f_record.cep\\js",
+            env: {},
+            fs: fakeFs,
+            platform: "win32",
+        }),
+        "C:\\Program Files\\Adobe\\Adobe Photoshop 2022\\node.exe",
+    );
 })().catch(error => {
     console.error(error);
     process.exit(1);

@@ -1,17 +1,25 @@
 const path = require('path');
+const fs = require('fs');
 const { spawn } = require('child_process');
 
 function runExportReplayWorker(exportParams, onProgress, options = {}) {
     const spawnFn = options.spawn || spawn;
-    const nodeCommand = options.nodeCommand || 'node';
     const workerPath = options.workerPath || path.join(options.baseDir || __dirname, 'exportReplay.js');
+    const nodeCommand = options.nodeCommand || resolveNodeCommand({
+        baseDir: path.dirname(workerPath),
+        env: options.env,
+        fs: options.fs,
+        platform: options.platform,
+    });
 
     return new Promise((resolve, reject) => {
         let settled = false;
+        let worker = null;
 
         const resolveOnce = () => {
             if (!settled) {
                 settled = true;
+                cleanupWorker(worker);
                 resolve();
             }
         };
@@ -19,11 +27,11 @@ function runExportReplayWorker(exportParams, onProgress, options = {}) {
         const rejectOnce = (error) => {
             if (!settled) {
                 settled = true;
+                cleanupWorker(worker);
                 reject(error);
             }
         };
 
-        let worker = null;
         try {
             worker = spawnFn(nodeCommand, [workerPath], {
                 stdio: ['pipe', 'pipe', 'pipe', 'ipc'],
@@ -78,11 +86,112 @@ function runExportReplayWorker(exportParams, onProgress, options = {}) {
     });
 }
 
+function cleanupWorker(worker) {
+    if (!worker) {
+        return;
+    }
+    if (typeof worker.disconnect === 'function') {
+        try {
+            worker.disconnect();
+        } catch (error) {
+            // Ignore cleanup errors after the export result has already been settled.
+        }
+    }
+    if (typeof worker.kill === 'function' && !worker.killed) {
+        try {
+            worker.kill();
+        } catch (error) {
+            // Ignore cleanup errors after the export result has already been settled.
+        }
+    }
+}
+
 function createWorkerExitError(code, signal) {
     if (signal) {
         return new Error(`Worker exited with signal ${signal}`);
     }
     return new Error(`Worker exited with code ${code}`);
+}
+
+function resolveNodeCommand(options = {}) {
+    const env = options.env || process.env;
+    const fsImpl = options.fs || fs;
+    const platform = options.platform || process.platform;
+    const executableName = platform === 'win32' ? 'node.exe' : 'node';
+    const envPath = readEnvPath(['F_RECORD_NODE_PATH'], env);
+
+    if (envPath !== null) {
+        return envPath;
+    }
+
+    if (isNodeExecutable(process.execPath, executableName, fsImpl)) {
+        return process.execPath;
+    }
+
+    const baseDirs = [
+        options.baseDir,
+        __dirname,
+    ].filter(Boolean);
+    for (let i = 0; i < baseDirs.length; i++) {
+        const foundPath = findNodeInAncestors(baseDirs[i], executableName, fsImpl);
+        if (foundPath !== null) {
+            return foundPath;
+        }
+    }
+
+    return platform === 'win32' ? 'node.exe' : 'node';
+}
+
+function findNodeInAncestors(startDir, executableName, fsImpl) {
+    let currentDir = path.resolve(startDir);
+    while (true) {
+        const candidate = path.join(currentDir, executableName);
+        if (isFile(candidate, fsImpl)) {
+            return candidate;
+        }
+
+        const parentDir = path.dirname(currentDir);
+        if (parentDir === currentDir) {
+            return null;
+        }
+        currentDir = parentDir;
+    }
+}
+
+function readEnvPath(envNames, env) {
+    for (let i = 0; i < envNames.length; i++) {
+        const value = env[envNames[i]];
+        if (typeof value === 'string' && value.trim() !== '') {
+            return normalizeEnvPath(value);
+        }
+    }
+    return null;
+}
+
+function normalizeEnvPath(value) {
+    const trimmed = value.trim();
+    if (trimmed.length >= 2) {
+        const first = trimmed[0];
+        const last = trimmed[trimmed.length - 1];
+        if ((first === '"' && last === '"') || (first === "'" && last === "'")) {
+            return trimmed.slice(1, -1).trim();
+        }
+    }
+    return trimmed;
+}
+
+function isNodeExecutable(filePath, executableName, fsImpl) {
+    return typeof filePath === 'string' &&
+        path.basename(filePath).toLowerCase() === executableName.toLowerCase() &&
+        isFile(filePath, fsImpl);
+}
+
+function isFile(filePath, fsImpl) {
+    try {
+        return fsImpl.statSync(filePath).isFile();
+    } catch (error) {
+        return false;
+    }
 }
 
 function toWorkerError(data) {
@@ -100,7 +209,9 @@ function toWorkerError(data) {
 }
 
 module.exports = {
+    cleanupWorker,
     createWorkerExitError,
+    resolveNodeCommand,
     runExportReplayWorker,
     toWorkerError,
 };

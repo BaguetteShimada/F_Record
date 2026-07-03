@@ -1,9 +1,23 @@
 const fs = require("fs");
 const path = require('path');
 const writeFileAtomic = require('write-file-atomic');
-const { openLocalPathWithExecFile } = require(path.join(__dirname, 'js', 'localPathOpener.js'));
-const { runExportReplayWorker } = require(path.join(__dirname, 'js', 'exportReplayWorker.js'));
-const { resolveExportBinaries } = require(path.join(__dirname, 'js', 'exportReplayUtils.js'));
+
+function getPanelScriptPath(fileName) {
+    const candidates = [
+        path.join(__dirname, 'js', fileName),
+        path.join(__dirname, fileName),
+    ];
+    for (let i = 0; i < candidates.length; i++) {
+        if (fs.existsSync(candidates[i])) {
+            return candidates[i];
+        }
+    }
+    return candidates[0];
+}
+
+const { openLocalPathWithExecFile } = require(getPanelScriptPath('localPathOpener.js'));
+const { runExportReplayWorker } = require(getPanelScriptPath('exportReplayWorker.js'));
+const { resolveExportBinaries } = require(getPanelScriptPath('exportReplayUtils.js'));
 const cs = new CSInterface();
 
 
@@ -76,6 +90,6 @@ function validateExportBinaries() {
 
 async function exportReplay(exportParams, onProgress) {
     return runExportReplayWorker(exportParams, onProgress, {
-        workerPath: path.join(__dirname, 'js', 'exportReplay.js'),
+        workerPath: getPanelScriptPath('exportReplay.js'),
     });
 }
