@@ -12,6 +12,10 @@ const cepReleaseDir = path.join(distDir, "com.f_know.f_record.cep");
 const generatorReleaseDir = path.join(distDir, "com.f_know.f_record.generator");
 const zipPath = path.join(distDir, "F_Record.zip");
 const bundledExportBinaryPattern = /(^|\/)(ffmpeg|ffprobe)(\.exe)?$/i;
+const cepRuntimeDependencies = [
+    "fluent-ffmpeg",
+    "write-file-atomic",
+];
 
 function main() {
     runProjectInstall("cep");
@@ -21,6 +25,7 @@ function main() {
 
     resetDirectory(distDir);
     copyDirectory(path.join(rootDir, "cep", "dist"), cepReleaseDir);
+    copyCepRuntimeDependencies();
     createGeneratorRelease();
     createZip();
     assertNoBundledExportBinaries(zipPath);
@@ -39,6 +44,61 @@ function copyDirectory(sourcePath, targetPath) {
         throw new Error(`Missing build output: ${sourcePath}`);
     }
     fs.cpSync(sourcePath, targetPath, { recursive: true });
+}
+
+function copyCepRuntimeDependencies() {
+    const copiedDependencies = new Set();
+    for (const dependencyName of cepRuntimeDependencies) {
+        copyNodeDependencyTree(dependencyName, path.join(rootDir, "cep"), cepReleaseDir, copiedDependencies);
+    }
+}
+
+function copyNodeDependencyTree(dependencyName, resolveFromDir, releaseDir, copiedDependencies) {
+    if (copiedDependencies.has(dependencyName)) {
+        return;
+    }
+    copiedDependencies.add(dependencyName);
+
+    const packageDir = resolveNodePackageDir(dependencyName, resolveFromDir);
+    const packageJsonPath = path.join(packageDir, "package.json");
+    const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, "utf8"));
+    const targetDir = path.join(releaseDir, "node_modules", ...dependencyName.split("/"));
+
+    copyNodePackageDirectory(packageDir, targetDir);
+
+    const childDependencies = Object.assign(
+        {},
+        packageJson.dependencies || {},
+        packageJson.optionalDependencies || {},
+    );
+    for (const childDependencyName of Object.keys(childDependencies)) {
+        copyNodeDependencyTree(childDependencyName, packageDir, releaseDir, copiedDependencies);
+    }
+}
+
+function resolveNodePackageDir(packageName, resolveFromDir) {
+    const packageJsonPath = require.resolve(`${packageName}/package.json`, {
+        paths: [resolveFromDir],
+    });
+    return path.dirname(packageJsonPath);
+}
+
+function copyNodePackageDirectory(sourcePath, targetPath) {
+    assertInsideRoot(sourcePath);
+    assertInsideRoot(targetPath);
+    fs.rmSync(targetPath, { recursive: true, force: true });
+    fs.mkdirSync(path.dirname(targetPath), { recursive: true });
+    fs.cpSync(sourcePath, targetPath, {
+        recursive: true,
+        dereference: true,
+        filter: (source) => {
+            const relativePath = path.relative(sourcePath, source);
+            if (relativePath === "") {
+                return true;
+            }
+            return relativePath.split(path.sep)[0] !== "node_modules";
+        },
+    });
 }
 
 function createGeneratorRelease() {
@@ -97,5 +157,6 @@ if (require.main === module) {
 
 module.exports = {
     assertNoBundledExportBinaries,
+    cepRuntimeDependencies,
     findBundledExportBinaryEntries,
 };
