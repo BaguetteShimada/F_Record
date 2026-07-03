@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Button, Content, Dialog, DialogTrigger, Flex, Item, Picker, Text, ToastQueue } from '@adobe/react-spectrum';
+import { Button, DialogTrigger, Text, ToastQueue } from '@adobe/react-spectrum';
 import Replay from '@spectrum-icons/workflow/Replay';
 import { useTranslation } from 'react-i18next';
 import { FPS } from './constants';
@@ -13,9 +13,8 @@ import {
     createStartedExportSettings,
     createStartExportSettingsChange,
 } from './exportSettingsActions';
-import { ASPECT_RATIO_OPTIONS } from './exportDialogOptions';
-import { applyExportStringOptionChange } from './exportOptionActions';
 import ExportProgressBar from './ExportProgressBar';
+import ExportReplayDialog from './ExportReplayDialog';
 
 interface ExportReplayButtonProps {
     configData: React.MutableRefObject<ConfigData>;
@@ -98,53 +97,14 @@ function ExportReplayButton({
                         <Text>{t('Export')}</Text>
                     </Button>
                     {(close) => (
-                        <Dialog>
-                            <Content>
-                                <Flex direction="column">
-                                    <Flex direction="row" justifyContent="space-between" marginBottom="size-100">
-                                        <Text>{t('Aspect Ratio')}</Text>
-                                        <Picker aria-label="Replay Aspect Ratio"
-                                            selectedKey={exportSettings.current.aspectRatio}
-                                            onSelectionChange={(key) => {
-                                                applyExportStringOptionChange('aspectRatio', key, onExportSettingsChange);
-                                            }}
-                                            width="size-1600">
-                                            {ASPECT_RATIO_OPTIONS.map((option) => (
-                                                <Item key={option.key}>
-                                                    {'labelKey' in option ? t(option.labelKey) : option.label}
-                                                </Item>
-                                            ))}
-                                        </Picker>
-                                    </Flex>
-                                    <Flex direction="row" justifyContent="space-between" marginBottom="size-300">
-                                        <Text>{t('Duration')}</Text>
-                                        <Picker aria-label="Replay Duration"
-                                            selectedKey={exportSettings.current.duration}
-                                            onSelectionChange={(key) => {
-                                                applyExportStringOptionChange('duration', key, onExportSettingsChange);
-                                            }}
-                                            width="size-1600">
-                                            {durationOptions.map((option) => (
-                                                <Item key={option.key}>
-                                                    {option.durationSeconds + t('s') + (option.isOriginal ? ' ' + t('(original)') : '')}
-                                                </Item>
-                                            ))}
-                                        </Picker>
-                                    </Flex>
-                                    <Flex justifyContent="center">
-                                        <Button
-                                            variant="accent"
-                                            onPress={() => {
-                                                clickConfirm(close);
-                                            }}
-                                            width="size-1200"
-                                        >
-                                            {t('Confirm')}
-                                        </Button>
-                                    </Flex>
-                                </Flex>
-                            </Content>
-                        </Dialog>
+                        <ExportReplayDialog
+                            exportSettings={exportSettings.current}
+                            durationOptions={durationOptions}
+                            onExportSettingsChange={onExportSettingsChange}
+                            onConfirm={() => {
+                                clickConfirm(close);
+                            }}
+                        />
                     )}
                 </DialogTrigger>
             ) : (
