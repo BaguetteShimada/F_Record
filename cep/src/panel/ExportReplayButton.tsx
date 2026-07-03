@@ -75,7 +75,10 @@ function ExportReplayButton({
                         try {
                             openLocalPath(result.data);
                         } catch (error) {
-                            //pass
+                            ToastQueue.negative(t('Error'), {
+                                actionLabel: t('Details'),
+                                onAction: () => showError(error)
+                            });
                         }
                     }
                 });
