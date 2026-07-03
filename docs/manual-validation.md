@@ -31,8 +31,12 @@
 
 每个版本都按 README 安装：
 
-1. 将 `com.f_know.f_record.cep` 放入 `Required\CEP\extensions`。
-2. 将 `com.f_know.f_record.generator` 放入 `Plug-ins\Generator`。
+1. 关闭 Photoshop。
+2. 用管理员 PowerShell 运行安装脚本：
+   ```powershell
+   .\scripts\installPhotoshopPlugin.ps1 -PhotoshopRoot "C:\Program Files\Adobe\Adobe Photoshop 2022"
+   ```
+   如需验证其他版本，把 `PhotoshopRoot` 改成对应 Photoshop 主目录。
 3. 在 Photoshop 首选项中启用 Generator 和旧版扩展面板。
 4. 从 `窗口 -> 扩展(旧版)` 打开 F_Record。
 
