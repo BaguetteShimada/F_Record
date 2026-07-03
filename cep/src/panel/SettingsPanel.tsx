@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { RadioGroup, Radio, TextField, Tooltip, TooltipTrigger, ContextualHelp, Content } from "@adobe/react-spectrum";
+import { TextField, Tooltip, TooltipTrigger, ContextualHelp, Content } from "@adobe/react-spectrum";
 import { Text } from "@adobe/react-spectrum";
 import { Picker } from "@adobe/react-spectrum";
 import { ActionButton, Item } from "@adobe/react-spectrum";
@@ -118,19 +118,21 @@ function SettingsPanel({configData, onConfigChange}: SettingsPanelProps) {
                 <div className="fr-settings-label">
                     <Text>{t('Language')}</Text>
                 </div>
-                <RadioGroup
-                    orientation="horizontal"
-                    value={configData.current.language}
-                    onChange={(value) => {
+                <Picker
+                    aria-label="Language"
+                    selectedKey={configData.current.language}
+                    onSelectionChange={(key) => {
+                        const value = String(key);
                         i18n.changeLanguage(value);
                         onConfigChange({
                             language: value
                         });
                     }}
+                    width="size-1200"
                 >
-                    <Radio value="cn">中文</Radio>
-                    <Radio value="en">English</Radio>
-                </RadioGroup>
+                    <Item key="cn">中文</Item>
+                    <Item key="en">English</Item>
+                </Picker>
             </div>
         </div>
     )

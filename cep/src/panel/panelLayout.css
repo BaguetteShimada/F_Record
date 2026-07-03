@@ -42,8 +42,14 @@
   white-space: nowrap;
 }
 
-.fr-panel-shell svg,
-.fr-panel-shell .spectrum-Icon {
+.fr-tabs [role="tab"] svg,
+.fr-tabs [role="tab"] .spectrum-Icon,
+.fr-row-label svg,
+.fr-row-label .spectrum-Icon,
+.fr-process-folder-button svg,
+.fr-process-folder-button .spectrum-Icon,
+.fr-export-button svg,
+.fr-export-button .spectrum-Icon {
   flex: 0 0 18px;
   width: 18px !important;
   min-width: 18px;
@@ -51,6 +57,32 @@
   height: 18px !important;
   min-height: 18px;
   max-height: 18px;
+}
+
+.fr-settings .spectrum-Picker svg,
+.fr-settings .spectrum-Picker .spectrum-Icon,
+.fr-settings [role="button"][aria-haspopup="listbox"] svg,
+.fr-settings [role="button"][aria-haspopup="listbox"] .spectrum-Icon,
+.fr-settings button[aria-haspopup="listbox"] svg,
+.fr-settings button[aria-haspopup="listbox"] .spectrum-Icon {
+  position: absolute;
+  top: 50%;
+  right: 12px;
+  flex: none;
+  width: 16px !important;
+  min-width: 16px;
+  max-width: 16px;
+  height: 16px !important;
+  min-height: 16px;
+  max-height: 16px;
+  margin: 0;
+  transform: translateY(-50%);
+}
+
+.fr-settings .spectrum-Picker,
+.fr-settings [role="button"][aria-haspopup="listbox"],
+.fr-settings button[aria-haspopup="listbox"] {
+  position: relative;
 }
 
 .fr-dashboard {
