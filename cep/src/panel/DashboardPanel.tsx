@@ -1,21 +1,19 @@
 import * as React from 'react';
-import { ActionButton, Tooltip, TooltipTrigger } from '@adobe/react-spectrum';
 import ExportReplayButton from "./ExportReplayButton";
 import Clock from '@spectrum-icons/workflow/Clock';
 import Images from '@spectrum-icons/workflow/Images';
 import { useTranslation } from 'react-i18next';
 import type { ConfigData, CurrentDocumentValue, ExportProgress, ExportSettings } from './models';
-import { GITHUB_REPOSITORY_URL, openExternalUrl } from './externalLinks';
 import {
     getDocumentNameDisplayValue,
     getImageCountDisplayValue,
     getTimeSpentDisplayValue,
 } from './dashboardValues';
 import RecordToggleButton from './RecordToggleButton';
-import GitHubIcon from './GitHubIcon';
 import { openCurrentDocumentProcessImageFolder } from './documentFolderActions';
 import DashboardTextRow from './DashboardTextRow';
 import DashboardDocumentRow from './DashboardDocumentRow';
+import GitHubLinkButton from './GitHubLinkButton';
 
 interface DashboardPanelProps {
     configData: React.MutableRefObject<ConfigData>;
@@ -82,18 +80,7 @@ function DashboardPanel({
                 />
             </div>
             <div className="fr-community-links">
-                <TooltipTrigger delay={0}>
-                    <ActionButton
-                        aria-label="GitHub"
-                        onPress={() => {
-                            openExternalUrl(GITHUB_REPOSITORY_URL, onError);
-                        }}
-                        UNSAFE_className="fr-github-button"
-                    >
-                        <GitHubIcon />
-                    </ActionButton>
-                    <Tooltip>GitHub</Tooltip>
-                </TooltipTrigger>
+                <GitHubLinkButton onError={onError} />
             </div>
         </div>
     );
