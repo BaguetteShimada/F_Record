@@ -15,9 +15,9 @@ import {
     getImageCountDisplayValue,
     getTimeSpentDisplayValue,
 } from './dashboardValues';
-import { getProcessImageFolderPath } from './documentPaths';
 import RecordToggleButton from './RecordToggleButton';
 import GitHubIcon from './GitHubIcon';
+import { openCurrentDocumentProcessImageFolder } from './documentFolderActions';
 
 interface DashboardPanelProps {
     configData: React.MutableRefObject<ConfigData>;
@@ -74,11 +74,7 @@ function DashboardPanel({
                                 <ActionButton
                                     aria-label="Open Current Document Process Image Folder"
                                     onPress={() => {
-                                        try {
-                                            openLocalPath(getProcessImageFolderPath(configData.current.processImageFolderPath, documentValue.createTime));
-                                        } catch (error) {
-                                            onError(error);
-                                        }
+                                        openCurrentDocumentProcessImageFolder(configData.current, documentValue, onError);
                                     }}
                                     isDisabled={!documentValue.count}
                                     UNSAFE_className="fr-document-folder-button"
