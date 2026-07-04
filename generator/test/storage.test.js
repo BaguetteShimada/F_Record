@@ -2,6 +2,7 @@ const assert = require("assert");
 const {
     readJsonFile,
     shouldRetryReadJsonError,
+    shouldRetryWriteFileAtomicError,
 } = require("../src/storage");
 
 function createReadSequence(values) {
@@ -85,3 +86,14 @@ assert.deepStrictEqual(nonRetryable.calls, ["read"]);
 assert.strictEqual(shouldRetryReadJsonError(new SyntaxError("bad json")), true);
 assert.strictEqual(shouldRetryReadJsonError(busyError), true);
 assert.strictEqual(shouldRetryReadJsonError(enoentError), false);
+
+const permissionError = new Error("permission denied");
+permissionError.code = "EPERM";
+const accessError = new Error("access denied");
+accessError.code = "EACCES";
+
+assert.strictEqual(shouldRetryWriteFileAtomicError(permissionError), true);
+assert.strictEqual(shouldRetryWriteFileAtomicError(accessError), true);
+assert.strictEqual(shouldRetryWriteFileAtomicError(busyError), true);
+assert.strictEqual(shouldRetryWriteFileAtomicError(enoentError), false);
+assert.strictEqual(shouldRetryWriteFileAtomicError(null), false);
