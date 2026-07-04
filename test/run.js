@@ -4,6 +4,7 @@ const testFiles = [
     "projectRunner.test.js",
     "build.test.js",
     "communityReferences.test.js",
+    "installPhotoshopPluginScript.test.js",
 ];
 
 runListedNodeTests({
