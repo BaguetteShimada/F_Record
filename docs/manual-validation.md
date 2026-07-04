@@ -7,16 +7,16 @@
 1. 在仓库根目录运行：
    ```powershell
    pnpm install
-   pnpm run test
-   pnpm run build
+   pnpm run check
    ```
 2. 确认生成 `dist/F_Record.zip`。
 3. 确认 zip 内只有：
    - `com.f_know.f_record.cep`
    - `com.f_know.f_record.generator`
-4. 确认 zip 内没有 `ffmpeg`、`ffmpeg.exe`、`ffprobe`、`ffprobe.exe`。
+4. 确认 zip 内包含 CEP manifest、CEP index、导出脚本、Generator index 和 Generator package。
+5. 确认 zip 内没有 `ffmpeg`、`ffmpeg.exe`、`ffprobe`、`ffprobe.exe`。
 
-预期结果：测试和构建通过，构建脚本不会报出 bundled ffmpeg/ffprobe 错误。
+预期结果：测试、类型检查、构建和打包通过，构建脚本不会报出缺失必要入口或 bundled ffmpeg/ffprobe 错误。
 
 ## 2. Photoshop 安装矩阵
 
@@ -37,6 +37,7 @@
    .\scripts\installPhotoshopPlugin.ps1 -PhotoshopRoot "C:\Program Files\Adobe\Adobe Photoshop 2022"
    ```
    如需验证其他版本，把 `PhotoshopRoot` 改成对应 Photoshop 主目录。
+   非管理员 PowerShell 应在写权限预检阶段失败，并提示以管理员身份重试，不应移动现有插件目录。
 3. 在 Photoshop 首选项中启用 Generator 和旧版扩展面板。
 4. 从 `窗口 -> 扩展(旧版)` 打开 F_Record。
 
