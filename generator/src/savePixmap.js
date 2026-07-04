@@ -7,6 +7,7 @@ const {
     getTargetImageSize,
     normalizeSavePixmapSettings,
 } = require("./savePixmapSettings");
+const { createInitialSavePixmapBuffer } = require("./savePixmapBuffer");
 const { assertValidSavePixmapInput } = require("./savePixmapValidation");
 
 /**
@@ -48,27 +49,10 @@ async function savePixmap(pixmap, filePath, saveSettings) {
         // 创建一个新的Jimp图像
         const image = new Jimp(targetWidth, targetHeight);
         
-        // 创建一个临时buffer来存储图像数据
-        const buffer = Buffer.alloc(targetWidth * targetHeight * 4);
-        
         // 根据格式决定填充颜色
         const formatType = getSavePixmapFormatType(format);
-        
-        if (formatType === 'png') {
-            // PNG格式使用透明填充
-            buffer.fill(0);
-        } else {
-            // JPG格式使用白色填充（或指定的背景色）
-            const bg = backgroundColor || { r: 255, g: 255, b: 255 };
-            
-            // 填充整个buffer为白色（RGBA: 255, 255, 255, 255）
-            for (let i = 0; i < buffer.length; i += 4) {
-                buffer[i] = bg.r;     // R
-                buffer[i + 1] = bg.g; // G
-                buffer[i + 2] = bg.b; // B
-                buffer[i + 3] = 255;  // A (完全不透明)
-            }
-        }
+        // 创建一个临时buffer来存储图像数据
+        const buffer = createInitialSavePixmapBuffer(targetWidth, targetHeight, formatType, backgroundColor);
         
         // 批量处理图像数据，调整像素顺序
         for (let y = 0; y < extract.height; y++) {
