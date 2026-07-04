@@ -1,6 +1,7 @@
 const assert = require("assert");
 const {
     DEFAULT_BACKGROUND_COLOR,
+    assertValidTargetImageSize,
     clampJpgQuality,
     getSavePixmapFormatType,
     getTargetImageSize,
@@ -51,3 +52,15 @@ assert.deepStrictEqual(
 assert.strictEqual(clampJpgQuality(-1), 0);
 assert.strictEqual(clampJpgQuality(80), 80);
 assert.strictEqual(clampJpgQuality(120), 100);
+
+assert.doesNotThrow(() => {
+    assertValidTargetImageSize({ width: 1, height: 1 });
+});
+assert.throws(
+    () => assertValidTargetImageSize({ width: 0, height: 1 }),
+    /目标图像尺寸无效/,
+);
+assert.throws(
+    () => assertValidTargetImageSize({ width: 1, height: 0 }),
+    /目标图像尺寸无效/,
+);
