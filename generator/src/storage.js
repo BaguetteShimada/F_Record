@@ -1,6 +1,8 @@
 const fs = require("fs");
 const writeFileAtomic = require("write-file-atomic");
 
+const TRANSIENT_FILE_ERROR_CODES = ["EPERM", "EACCES", "EBUSY"];
+
 function pathExists(targetPath, fsImpl) {
     return (fsImpl || fs).existsSync(targetPath);
 }
@@ -70,11 +72,15 @@ function shouldRetryReadJsonError(error) {
     if (error instanceof SyntaxError) {
         return true;
     }
-    return Boolean(error && ["EPERM", "EACCES", "EBUSY"].includes(error.code));
+    return hasTransientFileErrorCode(error);
 }
 
 function shouldRetryWriteFileAtomicError(error) {
-    return Boolean(error && ["EPERM", "EACCES", "EBUSY"].includes(error.code));
+    return hasTransientFileErrorCode(error);
+}
+
+function hasTransientFileErrorCode(error) {
+    return Boolean(error && TRANSIENT_FILE_ERROR_CODES.includes(error.code));
 }
 
 module.exports = {

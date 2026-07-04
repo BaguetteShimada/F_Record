@@ -114,6 +114,8 @@ permissionError.code = "EPERM";
 const accessError = new Error("access denied");
 accessError.code = "EACCES";
 
+assert.strictEqual(shouldRetryReadJsonError(accessError), true);
+
 assert.strictEqual(shouldRetryWriteFileAtomicError(permissionError), true);
 assert.strictEqual(shouldRetryWriteFileAtomicError(accessError), true);
 assert.strictEqual(shouldRetryWriteFileAtomicError(busyError), true);
