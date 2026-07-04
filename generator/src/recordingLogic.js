@@ -56,8 +56,11 @@ function pad(num, size) {
 }
 
 module.exports = {
+    RECENT_EXPORT_IGNORE_MS,
     applyTimeSpentTick,
     getNextImageName,
+    hasPixelChanges,
     markImageSaved,
+    shouldAddTimeSpent,
     shouldHandleImageChanged,
 };
