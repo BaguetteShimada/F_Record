@@ -1,4 +1,5 @@
 const { createPollingTask } = require("./pollingTask");
+const { createRuntimePollingTaskDefinitions } = require("./runtimePollingTasks");
 
 function createRuntimePollingService(options) {
     const createPollingTaskFn = options.createPollingTask || createPollingTask;
@@ -18,11 +19,14 @@ function createRuntimePollingService(options) {
 
     function start() {
         stop();
-        tasks.push(
-            createLoggedPollingTask("loopUpdateConfigData", 500, options.updateConfigData, true),
-            createLoggedPollingTask("loopUpdateDocument", 500, options.updateDocument, true),
-            createLoggedPollingTask("loopUpdateDocumentTimeSpent", 1000, options.updateDocumentTimeSpent, false),
-        );
+        createRuntimePollingTaskDefinitions(options).forEach(taskDefinition => {
+            tasks.push(createLoggedPollingTask(
+                taskDefinition.name,
+                taskDefinition.intervalMs,
+                taskDefinition.run,
+                taskDefinition.runImmediately,
+            ));
+        });
         tasks.forEach(task => task.start());
     }
 
