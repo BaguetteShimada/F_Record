@@ -168,6 +168,36 @@ function createCaptureGate(events) {
     });
 
     assert.deepStrictEqual(skippedPixelEvents, ["gate:skipped"]);
+
+    const handlerErrorEvents = [];
+    const failingHandler = createImageChangedHandler({
+        captureGate: {
+            run: async () => {
+                handlerErrorEvents.push("gate");
+            },
+        },
+        generator,
+        getConfigData: () => {
+            throw new Error("config failed");
+        },
+        getNowDocument: () => nowDocument,
+        getPixmapAndSaveSettings: async () => {
+            throw new Error("should not read pixmap");
+        },
+        logger: {
+            error: (message, error) => handlerErrorEvents.push(["error", message, error.message]),
+        },
+        mutex,
+        saveCaptureFrame: async () => {
+            handlerErrorEvents.push("save");
+        },
+        shouldHandleImageChanged: () => true,
+    });
+
+    await failingHandler({ id: 7, layers: [{ pixels: true }] });
+    assert.deepStrictEqual(handlerErrorEvents, [
+        ["error", "handleImageChanged", "config failed"],
+    ]);
 })().catch(error => {
     console.error(error);
     process.exit(1);
