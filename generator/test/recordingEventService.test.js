@@ -142,6 +142,32 @@ function createCaptureGate(events) {
         ["save", nowDocument.createTime, 60],
         "gate:end",
     ]);
+
+    const skippedPixelEvents = [];
+    await handlePixelChanged({
+        captureGate: {
+            run: async () => {
+                skippedPixelEvents.push("gate:skipped");
+                return { started: false };
+            },
+        },
+        changedEvent: { id: 10 },
+        configData,
+        documentCreateTime: nowDocument.createTime,
+        generator,
+        getPixmapAndSaveSettings: async () => {
+            throw new Error("should not read pixmap");
+        },
+        logger: {
+            error: (message, error) => skippedPixelEvents.push(["error", message, error.message]),
+        },
+        mutex,
+        saveCaptureFrame: async () => {
+            skippedPixelEvents.push("save");
+        },
+    });
+
+    assert.deepStrictEqual(skippedPixelEvents, ["gate:skipped"]);
 })().catch(error => {
     console.error(error);
     process.exit(1);
