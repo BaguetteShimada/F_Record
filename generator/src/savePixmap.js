@@ -7,6 +7,7 @@ const {
     getTargetImageSize,
     normalizeSavePixmapSettings,
 } = require("./savePixmapSettings");
+const { assertValidSavePixmapInput } = require("./savePixmapValidation");
 
 /**
  * 将Photoshop像素数据保存为图像文件
@@ -18,13 +19,7 @@ const {
 async function savePixmap(pixmap, filePath, saveSettings) {
     try {
         // 参数验证
-        if (!pixmap || !filePath || !saveSettings) {
-            throw new Error('缺少必要参数');
-        }
-        
-        if (!pixmap.pixels || !Buffer.isBuffer(pixmap.pixels)) {
-            throw new Error('无效的像素数据');
-        }
+        assertValidSavePixmapInput(pixmap, filePath, saveSettings);
         
         // 确保saveSettings包含所需属性
         saveSettings = normalizeSavePixmapSettings(pixmap, saveSettings);
