@@ -93,7 +93,7 @@ function assertPreflightError(overrides, expectedCode, storageOverrides = {}) {
 }
 
 const readDirectories = [];
-const { validateExportReplayPreflight } = loadExportReplayServiceModule({
+const { encodeExtendScriptStringArgument, validateExportReplayPreflight } = loadExportReplayServiceModule({
     pathExists: folderPath => folderPath.endsWith(path.join("recordings", "2026-07-04-010203")),
     readDirectory: folderPath => {
         readDirectories.push(folderPath);
@@ -113,6 +113,11 @@ assert.deepStrictEqual(
     },
 );
 assert.deepStrictEqual(readDirectories, [path.join("C:\\recordings", "2026-07-04-010203")]);
+
+assert.strictEqual(
+    encodeExtendScriptStringArgument("C:\\Users\\O'Neil\\F Record (test)\\final!.jpg"),
+    "C%3A%5CUsers%5CO%27Neil%5CF%20Record%20%28test%29%5Cfinal%21.jpg",
+);
 
 assertPreflightError({ documentValue: { id: null } }, "NO_ACTIVE_DOCUMENT");
 assertPreflightError({ documentValue: { createTime: null } }, "NO_ACTIVE_DOCUMENT");

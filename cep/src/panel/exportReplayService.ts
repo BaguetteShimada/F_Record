@@ -80,7 +80,7 @@ export function runPreparedExportReplay(
 
 function generateFinalJPG(filePath: string): Promise<void> {
     return new Promise((resolve, reject) => {
-        cs.evalScript("$.f_record.generateFinalJPG('" + encodeURIComponent(filePath) + "')", function(result) {
+        cs.evalScript("$.f_record.generateFinalJPG('" + encodeExtendScriptStringArgument(filePath) + "')", function(result) {
             if (result === EvalScript_ErrMessage) {
                 reject(new Error(result));
                 return;
@@ -88,4 +88,10 @@ function generateFinalJPG(filePath: string): Promise<void> {
             resolve();
         });
     });
+}
+
+export function encodeExtendScriptStringArgument(value: string): string {
+    return encodeURIComponent(value).replace(/[!'()*]/g, character =>
+        `%${character.charCodeAt(0).toString(16).toUpperCase()}`
+    );
 }
