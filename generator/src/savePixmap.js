@@ -1,6 +1,12 @@
 const fs = require('fs');
 const path = require('path');
 const Jimp = require('jimp');
+const {
+    clampJpgQuality,
+    getSavePixmapFormatType,
+    getTargetImageSize,
+    normalizeSavePixmapSettings,
+} = require("./savePixmapSettings");
 
 /**
  * 将Photoshop像素数据保存为图像文件
@@ -21,14 +27,7 @@ async function savePixmap(pixmap, filePath, saveSettings) {
         }
         
         // 确保saveSettings包含所需属性
-        saveSettings = {
-            format: 'jpg',
-            quality: 70,
-            padding: { left: 0, top: 0, right: 0, bottom: 0 },
-            extract: { x: 0, y: 0, width: pixmap.width || 0, height: pixmap.height || 0 },
-            backgroundColor: { r: 255, g: 255, b: 255 }, // 默认白色背景
-            ...saveSettings
-        };
+        saveSettings = normalizeSavePixmapSettings(pixmap, saveSettings);
         
         // 确保目标目录存在
         const targetDir = path.dirname(filePath);
@@ -43,8 +42,9 @@ async function savePixmap(pixmap, filePath, saveSettings) {
         const { format, quality, extract, padding, backgroundColor } = saveSettings;
         
         // 创建目标图像宽高
-        const targetWidth = extract.width + padding.left + padding.right;
-        const targetHeight = extract.height + padding.top + padding.bottom;
+        const targetSize = getTargetImageSize(extract, padding);
+        const targetWidth = targetSize.width;
+        const targetHeight = targetSize.height;
         
         if (targetWidth <= 0 || targetHeight <= 0) {
             throw new Error('目标图像尺寸无效');
@@ -57,7 +57,7 @@ async function savePixmap(pixmap, filePath, saveSettings) {
         const buffer = Buffer.alloc(targetWidth * targetHeight * 4);
         
         // 根据格式决定填充颜色
-        const formatType = (typeof format === 'string') ? format.toLowerCase() : 'jpg';
+        const formatType = getSavePixmapFormatType(format);
         
         if (formatType === 'png') {
             // PNG格式使用透明填充
@@ -131,7 +131,7 @@ async function savePixmap(pixmap, filePath, saveSettings) {
         image.bitmap.height = targetHeight;
         
         // 设置图像质量 (Jimp质量范围是0-100，Photoshop也是0-100)
-        const jpgQuality = Math.min(Math.max(0, quality), 100);
+        const jpgQuality = clampJpgQuality(quality);
         
         // 保存图像
         if (formatType === 'png') {
