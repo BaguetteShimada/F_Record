@@ -10,12 +10,12 @@
 2. 自动化检查通过：
    ```powershell
    pnpm install
-   pnpm run test
-   pnpm run build
+   pnpm run check
    ```
 3. `dist/F_Record.zip` 已生成。
-4. 构建脚本确认 zip 内没有 `ffmpeg`、`ffmpeg.exe`、`ffprobe`、`ffprobe.exe`。
-5. [手动验证清单](./manual-validation.md) 中的关键场景已完成：
+4. 构建脚本确认 zip 内有必要的 CEP/Generator 入口文件。
+5. 构建脚本确认 zip 内没有 `ffmpeg`、`ffmpeg.exe`、`ffprobe`、`ffprobe.exe`。
+6. [手动验证清单](./manual-validation.md) 中的关键场景已完成：
    - Photoshop 2022-2025 至少覆盖计划发布支持的版本。
    - 开启/关闭记录正常。
    - 过程图片保存和计数正常。
@@ -65,13 +65,14 @@
 
 4. 生成发布包：
    ```powershell
-   pnpm run build
+   pnpm run check
    ```
 
-5. 如需在本机 Photoshop 中做最终安装验证，用管理员 PowerShell 运行：
+5. 如需在本机 Photoshop 中做最终安装验证，先关闭 Photoshop，再用管理员 PowerShell 运行：
    ```powershell
    .\scripts\installPhotoshopPlugin.ps1 -PhotoshopRoot "C:\Program Files\Adobe\Adobe Photoshop 2022"
    ```
+   非管理员 PowerShell 会在写权限预检阶段失败，并提示需要以管理员身份重试。
 
 6. 在 GitHub 创建 Release：
    - 仓库：`https://github.com/BaguetteShimada/F_Record`
