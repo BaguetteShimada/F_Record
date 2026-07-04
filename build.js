@@ -16,6 +16,17 @@ const cepRuntimeDependencies = [
     "fluent-ffmpeg",
     "write-file-atomic",
 ];
+const releaseZipRequiredEntries = [
+    "com.f_know.f_record.cep/CSXS/manifest.xml",
+    "com.f_know.f_record.cep/index.html",
+    "com.f_know.f_record.cep/index.js",
+    "com.f_know.f_record.cep/init.jsx",
+    "com.f_know.f_record.cep/package.json",
+    "com.f_know.f_record.cep/js/exportReplay.js",
+    "com.f_know.f_record.cep/js/exportReplayWorker.js",
+    "com.f_know.f_record.generator/index.js",
+    "com.f_know.f_record.generator/package.json",
+];
 const excludedNodePackageRootDirectories = new Set([
     "coverage",
     "node_modules",
@@ -32,6 +43,7 @@ function main() {
     copyCepRuntimeDependencies();
     createGeneratorRelease();
     createZip();
+    assertReleaseZipStructure(zipPath);
     assertNoBundledExportBinaries(zipPath);
 }
 
@@ -137,6 +149,19 @@ function createZip() {
     zip.writeZip(zipPath);
 }
 
+function assertReleaseZipStructure(targetZipPath) {
+    const missingEntries = findMissingReleaseZipEntries(targetZipPath);
+    if (missingEntries.length > 0) {
+        throw new Error(`Release zip is missing required entries:\n${missingEntries.join("\n")}`);
+    }
+}
+
+function findMissingReleaseZipEntries(targetZipPath) {
+    const zip = new AdmZip(targetZipPath);
+    const entries = new Set(zip.getEntries().map(entry => entry.entryName.replace(/\\/g, "/")));
+    return releaseZipRequiredEntries.filter(entryName => !entries.has(entryName));
+}
+
 function assertNoBundledExportBinaries(targetZipPath) {
     const matches = findBundledExportBinaryEntries(targetZipPath);
     if (matches.length > 0) {
@@ -165,7 +190,10 @@ if (require.main === module) {
 
 module.exports = {
     assertNoBundledExportBinaries,
+    assertReleaseZipStructure,
     cepRuntimeDependencies,
     findBundledExportBinaryEntries,
+    findMissingReleaseZipEntries,
+    releaseZipRequiredEntries,
     shouldCopyNodePackageEntry,
 };
