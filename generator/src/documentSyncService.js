@@ -1,4 +1,5 @@
-const { buildNowDocument, getNowTimeString, resolveDocumentCreateTime } = require("./documentState");
+const { buildNowDocument, getNowTimeString } = require("./documentState");
+const { syncDocumentCreateTime } = require("./documentSettingsService");
 const {
     ensureDocumentValue,
     resetNowDocument,
@@ -13,31 +14,29 @@ async function syncNowDocument(options) {
     const createTimeFactory = options.createTimeFactory || getNowTimeString;
     const ensureDocumentValueFn = options.ensureDocumentValue || ensureDocumentValue;
     const resetNowDocumentFn = options.resetNowDocument || resetNowDocument;
+    const syncDocumentCreateTimeFn = options.syncDocumentCreateTime || syncDocumentCreateTime;
     const writeNowDocumentFn = options.writeNowDocument || writeNowDocument;
 
     let documentInfo = null;
-    let documentSettings = null;
+    let documentCreateTime = null;
     try{
         documentInfo = await generator.getDocumentInfo();
-        documentSettings = await generator.getDocumentSettingsForPlugin(documentInfo.id, pluginName);
-        const createTimeResult = resolveDocumentCreateTime(
+        const documentSettings = await generator.getDocumentSettingsForPlugin(documentInfo.id, pluginName);
+        documentCreateTime = await syncDocumentCreateTimeFn({
+            generator,
+            pluginName,
             documentInfo,
             documentSettings,
             documentIdToCreateTime,
             createTimeFactory,
-        );
-        documentSettings.createTime = createTimeResult.createTime;
-        if (createTimeResult.shouldPersist) {
-            await generator.setDocumentSettingsForPlugin(documentSettings, pluginName);
-        }
-        documentIdToCreateTime[documentInfo.id] = documentSettings.createTime;
+        });
     } catch (error) {
         return resetNowDocumentFn();
     }
 
-    ensureDocumentValueFn(documentSettings.createTime);
+    ensureDocumentValueFn(documentCreateTime);
 
-    const nowDocument = buildNowDocument(documentInfo, documentSettings.createTime, captureGate.isActive());
+    const nowDocument = buildNowDocument(documentInfo, documentCreateTime, captureGate.isActive());
     writeNowDocumentFn(nowDocument);
     return nowDocument;
 }
