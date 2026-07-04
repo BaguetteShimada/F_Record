@@ -1,3 +1,4 @@
+const fs = require("fs");
 const path = require("path");
 const { spawnSync } = require("child_process");
 
@@ -38,7 +39,13 @@ const testFiles = [
 ];
 
 for (const testFile of testFiles) {
-    const result = spawnSync(process.execPath, [path.join(__dirname, testFile)], {
+    const testFilePath = path.join(__dirname, testFile);
+    if (!fs.existsSync(testFilePath)) {
+        console.error(`Missing test file: ${testFile}`);
+        process.exit(1);
+    }
+
+    const result = spawnSync(process.execPath, [testFilePath], {
         stdio: "inherit",
     });
 
