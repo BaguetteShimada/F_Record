@@ -8,6 +8,10 @@ const {
     getCaptureImageFilePath,
     getCaptureImageFolderPath,
 } = require("./captureFramePaths");
+const {
+    createCaptureSavedResult,
+    createCaptureSkippedResult,
+} = require("./captureFrameResult");
 const { createDefaultDocumentValue } = require("./models");
 const { getNextImageName, markImageSaved } = require("./recordingLogic");
 const { ensureDirectory } = require("./storage");
@@ -24,7 +28,7 @@ async function saveCaptureFrame(options) {
     const unlock = await mutex.lock();
     try {
         if (!hasDocumentValue(documentCreateTime)) {
-            return { saved: false, reason: "missing-document-value" };
+            return createCaptureSkippedResult("missing-document-value");
         }
 
         const documentValue = readDocumentValue(documentCreateTime, createDefaultDocumentValue());
@@ -39,12 +43,7 @@ async function saveCaptureFrame(options) {
             createDefaultDocumentValue(),
         );
 
-        return {
-            saved: true,
-            imageFilePath,
-            imageName,
-            documentValue: nextDocumentValue,
-        };
+        return createCaptureSavedResult(imageFilePath, imageName, nextDocumentValue);
     } finally {
         unlock();
     }
