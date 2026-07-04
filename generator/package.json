@@ -5,7 +5,6 @@
   "main": "src/index.js",
   "generator-core-version": "1 - 4.1",
   "dependencies": {
-    "fs": "^0.0.1-security",
     "jimp": "^0.16.1",
     "write-file-atomic": "^3.0.3"
   },
