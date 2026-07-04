@@ -8,7 +8,7 @@ https://github.com/user-attachments/assets/0221cee9-ac70-48d1-b85a-b85667813b90
 
 **Plugin Principle**: It uses Photoshop's Generator interface. Whenever there is a change on the canvas, it captures a snapshot. In the end, these snapshots are combined into a single video.
 
-**Current Plugin Version**: 3.0
+**Current Plugin Version**: 3.1.0
 
 **Supported Operating Systems**: Windows 
 
@@ -23,7 +23,7 @@ https://github.com/user-attachments/assets/0221cee9-ac70-48d1-b85a-b85667813b90
 1. Install ffmpeg, and make sure `ffmpeg` and `ffprobe` can be run from the system environment.
    The recommended setup is to add ffmpeg's `bin` directory to the Windows `PATH`. If you do not want to change `PATH`, set `F_RECORD_FFMPEG_PATH` and `F_RECORD_FFPROBE_PATH` to the full paths of `ffmpeg.exe` and `ffprobe.exe`.
 
-2. Download the plugin zip file [F_Record.zip](https://github.com/BaguetteShimada/F_Record/releases/download/3.0/F_Record.zip), extract it, and open the folder.
+2. Download the plugin zip file [F_Record.zip](https://github.com/BaguetteShimada/F_Record/releases/download/3.1.0/F_Record.zip), extract it, and open the folder.
 
 3. Inside, you will find two folders: `com.f_know.f_record.cep` and `com.f_know.f_record.generator`. Copy them into the corresponding locations in your main Photoshop directory.
    The main Photoshop directory typically looks like `D:\Adobe Photoshop 2022`.
