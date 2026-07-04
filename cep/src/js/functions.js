@@ -66,11 +66,20 @@ function showError(error) {
 }
 
 function createShowErrorScript(error) {
-    const errorProperties = Object.getOwnPropertyNames(error).reduce((acc, key) => {
-        acc[key] = error[key];
-        return acc;
-    }, {});
-    return "$.f_record.showError('" + encodeExtendScriptStringArgument(JSON.stringify(errorProperties, null, 2)) + "')";
+    return "$.f_record.showError('" + encodeExtendScriptStringArgument(JSON.stringify(serializeErrorDetails(error), null, 2)) + "')";
+}
+
+function serializeErrorDetails(error) {
+    if (error && typeof error === "object") {
+        return Object.getOwnPropertyNames(error).reduce((acc, key) => {
+            acc[key] = error[key];
+            return acc;
+        }, {});
+    }
+    return {
+        name: "Error",
+        message: String(error),
+    };
 }
 
 function encodeExtendScriptStringArgument(value) {

@@ -60,6 +60,10 @@ function loadFunctionsScript() {
 }
 
 const { context, evalScripts } = loadFunctionsScript();
+function normalize(value) {
+    return JSON.parse(JSON.stringify(value));
+}
+
 assert.strictEqual(
     context.encodeExtendScriptStringArgument("C:\\Users\\O'Neil\\F Record (test)\\final!.jpg"),
     "C%3A%5CUsers%5CO%27Neil%5CF%20Record%20%28test%29%5Cfinal%21.jpg",
@@ -68,6 +72,19 @@ assert.strictEqual(
 const error = new Error("Export failed");
 error.detail = "C:\\Users\\O'Neil\\F Record (test)\\final!.jpg";
 const script = context.createShowErrorScript(error);
+
+assert.deepStrictEqual(
+    normalize(context.serializeErrorDetails("plain failure")),
+    { name: "Error", message: "plain failure" },
+);
+assert.deepStrictEqual(
+    normalize(context.serializeErrorDetails(null)),
+    { name: "Error", message: "null" },
+);
+assert.deepStrictEqual(
+    normalize(context.serializeErrorDetails({ reason: "unknown" })),
+    { reason: "unknown" },
+);
 
 assert.ok(script.startsWith("$.f_record.showError('"));
 assert.ok(script.endsWith("')"));
