@@ -1,5 +1,3 @@
-const fs = require('fs');
-const path = require('path');
 const Jimp = require('jimp');
 const {
     assertValidTargetImageSize,
@@ -9,6 +7,7 @@ const {
 } = require("./savePixmapSettings");
 const { createInitialSavePixmapBuffer } = require("./savePixmapBuffer");
 const { copyPixmapPixelsToRgbaBuffer } = require("./savePixmapCopy");
+const { ensureSavePixmapTargetDirectory } = require("./savePixmapTarget");
 const { assertValidSavePixmapInput } = require("./savePixmapValidation");
 const { writeSavePixmapImage } = require("./savePixmapWriter");
 
@@ -28,10 +27,7 @@ async function savePixmap(pixmap, filePath, saveSettings) {
         saveSettings = normalizeSavePixmapSettings(pixmap, saveSettings);
         
         // 确保目标目录存在
-        const targetDir = path.dirname(filePath);
-        if (!fs.existsSync(targetDir)) {
-            fs.mkdirSync(targetDir, { recursive: true });
-        }
+        ensureSavePixmapTargetDirectory(filePath);
 
         // 从saveSettings中获取参数
         const { format, quality, extract, padding, backgroundColor } = saveSettings;
