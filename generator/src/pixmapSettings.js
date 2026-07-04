@@ -70,5 +70,8 @@ function createSaveSettings(documentBounds, pixmapBounds, scale, qualityValue) {
 }
 
 module.exports = {
+    calculateMaxDimension,
+    calculateScale,
+    createSaveSettings,
     createPixmapSettings,
 };
