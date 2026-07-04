@@ -2,6 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const Jimp = require('jimp');
 const {
+    assertValidTargetImageSize,
     clampJpgQuality,
     getSavePixmapFormatType,
     getTargetImageSize,
@@ -39,10 +40,7 @@ async function savePixmap(pixmap, filePath, saveSettings) {
         const targetSize = getTargetImageSize(extract, padding);
         const targetWidth = targetSize.width;
         const targetHeight = targetSize.height;
-        
-        if (targetWidth <= 0 || targetHeight <= 0) {
-            throw new Error('目标图像尺寸无效');
-        }
+        assertValidTargetImageSize(targetSize);
         
         // 创建一个新的Jimp图像
         const image = new Jimp(targetWidth, targetHeight);

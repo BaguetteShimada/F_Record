@@ -21,12 +21,19 @@ function getTargetImageSize(extract, padding) {
     };
 }
 
+function assertValidTargetImageSize(targetSize) {
+    if (targetSize.width <= 0 || targetSize.height <= 0) {
+        throw new Error("目标图像尺寸无效");
+    }
+}
+
 function clampJpgQuality(quality) {
     return Math.min(Math.max(0, quality), 100);
 }
 
 module.exports = {
     DEFAULT_BACKGROUND_COLOR,
+    assertValidTargetImageSize,
     clampJpgQuality,
     getSavePixmapFormatType,
     getTargetImageSize,
