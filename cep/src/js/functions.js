@@ -62,14 +62,21 @@ function openLocalPath(path) {
 }
 
 function showError(error) {
+    cs.evalScript(createShowErrorScript(error));
+}
+
+function createShowErrorScript(error) {
     const errorProperties = Object.getOwnPropertyNames(error).reduce((acc, key) => {
         acc[key] = error[key];
         return acc;
     }, {});
-    const script = "$.f_record.showError('" + encodeURIComponent(JSON.stringify(errorProperties, null, 2)).replace(/[!'()*]/g, c => 
+    return "$.f_record.showError('" + encodeExtendScriptStringArgument(JSON.stringify(errorProperties, null, 2)) + "')";
+}
+
+function encodeExtendScriptStringArgument(value) {
+    return encodeURIComponent(value).replace(/[!'()*]/g, c =>
         '%' + c.charCodeAt(0).toString(16).toUpperCase()
-    ) + "')";
-    cs.evalScript(script);
+    );
 }
 
 function persistentPanel() {

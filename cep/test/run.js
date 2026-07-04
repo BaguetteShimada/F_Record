@@ -3,6 +3,7 @@ const { runListedNodeTests } = require("../../scripts/nodeTestRunner");
 const testFiles = [
     "exportReplayUtils.test.js",
     "exportReplayWorker.test.js",
+    "functions.test.js",
     "storage.test.js",
     "localPathOpener.test.js",
     "toastContainer.test.js",
