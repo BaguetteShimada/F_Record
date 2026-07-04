@@ -5,7 +5,10 @@ const path = require("path");
 const AdmZip = require("adm-zip");
 const {
     assertNoBundledExportBinaries,
+    assertReleaseZipStructure,
     findBundledExportBinaryEntries,
+    findMissingReleaseZipEntries,
+    releaseZipRequiredEntries,
     shouldCopyNodePackageEntry,
 } = require("../build");
 
@@ -14,12 +17,31 @@ const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), "f-record-build-test-"));
 try {
     const cleanZipPath = path.join(tempRoot, "clean.zip");
     const cleanZip = new AdmZip();
-    cleanZip.addFile("com.f_know.f_record.cep/js/exportReplay.js", Buffer.from(""));
-    cleanZip.addFile("com.f_know.f_record.generator/index.js", Buffer.from(""));
+    for (const entryName of releaseZipRequiredEntries) {
+        cleanZip.addFile(entryName, Buffer.from(""));
+    }
     cleanZip.writeZip(cleanZipPath);
 
     assert.deepStrictEqual(findBundledExportBinaryEntries(cleanZipPath), []);
     assert.doesNotThrow(() => assertNoBundledExportBinaries(cleanZipPath));
+    assert.deepStrictEqual(findMissingReleaseZipEntries(cleanZipPath), []);
+    assert.doesNotThrow(() => assertReleaseZipStructure(cleanZipPath));
+
+    const incompleteZipPath = path.join(tempRoot, "incomplete.zip");
+    const incompleteZip = new AdmZip();
+    for (const entryName of releaseZipRequiredEntries.filter(entryName => entryName !== "com.f_know.f_record.generator/package.json")) {
+        incompleteZip.addFile(entryName, Buffer.from(""));
+    }
+    incompleteZip.writeZip(incompleteZipPath);
+
+    assert.deepStrictEqual(
+        findMissingReleaseZipEntries(incompleteZipPath),
+        ["com.f_know.f_record.generator/package.json"],
+    );
+    assert.throws(
+        () => assertReleaseZipStructure(incompleteZipPath),
+        /Release zip is missing required entries/,
+    );
 
     const bundledZipPath = path.join(tempRoot, "bundled.zip");
     const bundledZip = new AdmZip();
