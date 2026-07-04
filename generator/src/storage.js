@@ -5,9 +5,10 @@ function pathExists(targetPath, fsImpl) {
     return (fsImpl || fs).existsSync(targetPath);
 }
 
-function ensureDirectory(directoryPath) {
-    if (!pathExists(directoryPath)) {
-        fs.mkdirSync(directoryPath, { recursive: true });
+function ensureDirectory(directoryPath, options) {
+    const fsImpl = options && options.fs ? options.fs : fs;
+    if (!pathExists(directoryPath, fsImpl)) {
+        fsImpl.mkdirSync(directoryPath, { recursive: true });
     }
 }
 

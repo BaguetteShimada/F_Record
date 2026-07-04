@@ -1,5 +1,6 @@
 const assert = require("assert");
 const {
+    ensureDirectory,
     readJsonFile,
     shouldRetryReadJsonError,
     shouldRetryWriteFileAtomicError,
@@ -23,6 +24,26 @@ function createReadSequence(values) {
         },
     };
 }
+
+const existingDirectoryCalls = [];
+ensureDirectory("C:\\recordings", {
+    fs: {
+        existsSync: () => true,
+        mkdirSync: () => existingDirectoryCalls.push("mkdir"),
+    },
+});
+assert.deepStrictEqual(existingDirectoryCalls, []);
+
+const missingDirectoryCalls = [];
+ensureDirectory("C:\\recordings", {
+    fs: {
+        existsSync: () => false,
+        mkdirSync: (directoryPath, options) => missingDirectoryCalls.push([directoryPath, options]),
+    },
+});
+assert.deepStrictEqual(missingDirectoryCalls, [
+    ["C:\\recordings", { recursive: true }],
+]);
 
 const syntaxThenValid = createReadSequence([
     "{",
