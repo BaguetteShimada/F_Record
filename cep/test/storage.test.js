@@ -4,7 +4,7 @@ const path = require("path");
 const ts = require("typescript");
 const vm = require("vm");
 
-function loadStorageModule(fileReads) {
+function loadStorageModule(fileReads, options = {}) {
     const storagePath = path.join(__dirname, "..", "src", "panel", "storage.ts");
     const source = fs.readFileSync(storagePath, "utf8");
     const compiled = ts.transpileModule(source, {
@@ -41,7 +41,7 @@ function loadStorageModule(fileReads) {
         readDir: () => [],
         unlinkFile: () => {},
         deleteDir: () => {},
-        writeFile: () => {},
+        writeFile: options.writeFile || (() => {}),
     };
 
     vm.runInNewContext(compiled.outputText, context, { filename: storagePath });
@@ -77,3 +77,34 @@ assert.strictEqual(nonRetryable.exports.readJsonFile("missing.json"), null);
 
 assert.strictEqual(busyThenValid.exports.shouldRetryJsonReadError(busyError), true);
 assert.strictEqual(nonRetryable.exports.shouldRetryJsonReadError(enoentError), false);
+
+const retryWriteCalls = [];
+const retryWriteModule = loadStorageModule([], {
+    writeFile: (filePath, content) => {
+        retryWriteCalls.push([filePath, content]);
+        if (retryWriteCalls.length === 1) {
+            throw busyError;
+        }
+    },
+});
+retryWriteModule.exports.writeJsonFile("configData.json", { ok: true });
+assert.deepStrictEqual(retryWriteCalls, [
+    ["configData.json", JSON.stringify({ ok: true }, null, 2)],
+    ["configData.json", JSON.stringify({ ok: true }, null, 2)],
+]);
+
+const failedWriteCalls = [];
+const failedWriteModule = loadStorageModule([], {
+    writeFile: () => {
+        failedWriteCalls.push("write");
+        throw enoentError;
+    },
+});
+assert.throws(
+    () => failedWriteModule.exports.writeJsonFile("missing.json", { ok: false }),
+    error => error === enoentError,
+);
+assert.deepStrictEqual(failedWriteCalls, ["write"]);
+
+assert.strictEqual(retryWriteModule.exports.shouldRetryJsonWriteError(busyError), true);
+assert.strictEqual(failedWriteModule.exports.shouldRetryJsonWriteError(enoentError), false);
