@@ -47,7 +47,7 @@ function writeFileAtomicSyncWithRetry(filePath, data) {
             return;
         } catch (error) {
             lastError = error;
-            if (!error || !["EPERM", "EACCES", "EBUSY"].includes(error.code) || i === delays.length) {
+            if (!shouldRetryWriteFileAtomicError(error) || i === delays.length) {
                 break;
             }
             sleepSync(delays[i]);
@@ -68,11 +68,16 @@ function shouldRetryReadJsonError(error) {
     return Boolean(error && ["EPERM", "EACCES", "EBUSY"].includes(error.code));
 }
 
+function shouldRetryWriteFileAtomicError(error) {
+    return Boolean(error && ["EPERM", "EACCES", "EBUSY"].includes(error.code));
+}
+
 module.exports = {
     pathExists,
     ensureDirectory,
     readJsonFile,
     shouldRetryReadJsonError,
+    shouldRetryWriteFileAtomicError,
     writeJsonFileAtomic,
     writeFileAtomicSyncWithRetry,
 };
