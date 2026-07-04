@@ -38,19 +38,23 @@ function writeJsonFileAtomic(filePath, value) {
     writeFileAtomicSyncWithRetry(filePath, JSON.stringify(value, null, 2));
 }
 
-function writeFileAtomicSyncWithRetry(filePath, data) {
-    const delays = [20, 50, 100, 200, 500];
+function writeFileAtomicSyncWithRetry(filePath, data, options) {
+    const writeFileAtomicSync = options && options.writeFileAtomicSync
+        ? options.writeFileAtomicSync
+        : writeFileAtomic.sync;
+    const retryDelays = options && options.retryDelays ? options.retryDelays : [20, 50, 100, 200, 500];
+    const sleepSyncFn = options && options.sleepSync ? options.sleepSync : sleepSync;
     let lastError = null;
-    for (let i = 0; i <= delays.length; i++) {
+    for (let i = 0; i <= retryDelays.length; i++) {
         try {
-            writeFileAtomic.sync(filePath, data);
+            writeFileAtomicSync(filePath, data);
             return;
         } catch (error) {
             lastError = error;
-            if (!shouldRetryWriteFileAtomicError(error) || i === delays.length) {
+            if (!shouldRetryWriteFileAtomicError(error) || i === retryDelays.length) {
                 break;
             }
-            sleepSync(delays[i]);
+            sleepSyncFn(retryDelays[i]);
         }
     }
     throw lastError;
