@@ -19,7 +19,7 @@ async function syncNowDocument(options) {
 
     let documentInfo = null;
     let documentCreateTime = null;
-    try{
+    try {
         documentInfo = await generator.getDocumentInfo();
         const documentSettings = await generator.getDocumentSettingsForPlugin(documentInfo.id, pluginName);
         documentCreateTime = await syncDocumentCreateTimeFn({

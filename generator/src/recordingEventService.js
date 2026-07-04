@@ -11,7 +11,7 @@ function createImageChangedHandler(options) {
     }, options);
 
     return async function handleImageChanged(changedEvent) {
-        try{
+        try {
             const configData = deps.getConfigData();
             const nowDocument = deps.getNowDocument();
             if (!deps.shouldHandleImageChanged(changedEvent, configData, nowDocument, deps.nowMsFactory())) {
@@ -30,7 +30,7 @@ function createImageChangedHandler(options) {
 
 async function handlePixelChanged(options) {
     await options.captureGate.run(async () => {
-        try{
+        try {
             let pixmap = null;
             let saveSettings = null;
             [pixmap, saveSettings] = await options.getPixmapAndSaveSettings(
