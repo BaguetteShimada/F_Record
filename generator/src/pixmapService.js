@@ -1,22 +1,21 @@
 const { createPixmapSettings } = require("./pixmapSettings");
+const {
+    createBoundsOnlyPixmapOptions,
+    createScaledPixmapOptions,
+} = require("./pixmapRequestOptions");
 
 async function getPixmapAndSaveSettings(generator, documentId, configData) {
     const documentInfo = await generator.getDocumentInfo(documentId);
     const documentBounds = documentInfo.bounds;
 
-    let pixmap = await generator.getDocumentPixmap(documentId, {
-        inputRect: documentBounds,
-        outputRect: documentBounds,
-        boundsOnly: true,
-    });
+    let pixmap = await generator.getDocumentPixmap(documentId, createBoundsOnlyPixmapOptions(documentBounds));
     const pixmapBounds = pixmap.bounds;
     const pixmapSettings = createPixmapSettings(documentBounds, pixmapBounds, configData);
 
-    pixmap = await generator.getDocumentPixmap(documentId, {
-        inputRect: documentBounds,
-        outputRect: documentBounds,
-        maxDimension: pixmapSettings.maxDimension,
-    });
+    pixmap = await generator.getDocumentPixmap(
+        documentId,
+        createScaledPixmapOptions(documentBounds, pixmapSettings.maxDimension),
+    );
 
     return [pixmap, pixmapSettings.saveSettings];
 }
