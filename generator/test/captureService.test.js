@@ -71,9 +71,10 @@ function createMutex(events) {
         assert.deepStrictEqual(missingEvents, ["lock", "unlock"]);
         assert.deepStrictEqual(missingResult, { saved: false, reason: "missing-document-value" });
 
+        const failedEvents = [];
         await assert.rejects(
             () => saveCaptureFrame({
-                mutex: createMutex([]),
+                mutex: createMutex(failedEvents),
                 documentCreateTime,
                 configData: { processImageFolderPath },
                 pixmap: {},
@@ -84,6 +85,7 @@ function createMutex(events) {
             }),
             /save failed/,
         );
+        assert.deepStrictEqual(failedEvents, ["lock", "unlock"]);
         assert.deepStrictEqual(readDocumentValue(documentCreateTime), {
             count: 1,
             timeSpent: 0,
