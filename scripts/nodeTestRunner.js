@@ -41,6 +41,7 @@ function runNodeTest(testDir, testFile) {
         process.exit(1);
     }
 
+    console.log(`[test] ${testFile}`);
     const result = spawnSync(process.execPath, [testFilePath], {
         stdio: "inherit",
     });
