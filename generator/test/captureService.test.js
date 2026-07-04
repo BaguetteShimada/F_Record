@@ -91,6 +91,26 @@ function createMutex(events) {
             timeSpent: 0,
             lastModifiedTime: 12345,
         });
+
+        const directoryFailureEvents = [];
+        await assert.rejects(
+            () => saveCaptureFrame({
+                mutex: createMutex(directoryFailureEvents),
+                documentCreateTime,
+                configData: { processImageFolderPath },
+                pixmap: {},
+                saveSettings: {},
+                ensureDirectoryFn: directoryPath => {
+                    directoryFailureEvents.push(["ensure", directoryPath.endsWith(documentCreateTime)]);
+                    throw new Error("directory failed");
+                },
+                savePixmapFn: async () => {
+                    directoryFailureEvents.push("save");
+                },
+            }),
+            /directory failed/,
+        );
+        assert.deepStrictEqual(directoryFailureEvents, [["ensure", true]]);
     } finally {
         if (originalUserProfile === undefined) {
             delete process.env.USERPROFILE;

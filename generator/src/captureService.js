@@ -20,10 +20,11 @@ async function saveCaptureFrame(options) {
     const mutex = options.mutex;
     const documentCreateTime = options.documentCreateTime;
     const imageFolderPath = getCaptureImageFolderPath(options.configData.processImageFolderPath, documentCreateTime);
+    const ensureDirectoryFn = options.ensureDirectoryFn || ensureDirectory;
     const nowMsFactory = options.nowMsFactory || (() => new Date().getTime());
     const savePixmapFn = options.savePixmapFn || savePixmap;
 
-    ensureDirectory(imageFolderPath);
+    ensureDirectoryFn(imageFolderPath);
 
     const unlock = await mutex.lock();
     try {
