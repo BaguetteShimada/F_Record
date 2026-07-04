@@ -47,6 +47,21 @@ function Assert-NoBundledExportBinaries {
     }
 }
 
+function Assert-DirectoryWritable {
+    param(
+        [string]$Path,
+        [string]$Label
+    )
+    $probePath = Join-Path $Path ".f-record-write-probe-$([Guid]::NewGuid().ToString('N')).tmp"
+    try {
+        [IO.File]::WriteAllText($probePath, "")
+    } catch {
+        throw "$Label is not writable: $Path`nRun PowerShell as Administrator, then retry the install script."
+    } finally {
+        Remove-Item -LiteralPath $probePath -Force -ErrorAction SilentlyContinue
+    }
+}
+
 function Get-PhotoshopProcesses {
     $photoshopRootPrefix = $PhotoshopRoot.TrimEnd([IO.Path]::DirectorySeparatorChar) + [IO.Path]::DirectorySeparatorChar
     Get-Process -ErrorAction SilentlyContinue |
@@ -87,6 +102,9 @@ foreach ($pair in $pluginPairs) {
     Assert-DirectoryExists -Path $pair.Source -Label "$($pair.Name) build output"
     $targetParent = Split-Path -Parent $pair.Target
     Assert-DirectoryExists -Path $targetParent -Label "$($pair.Name) install parent"
+    if (-not $WhatIfPreference) {
+        Assert-DirectoryWritable -Path $targetParent -Label "$($pair.Name) install parent"
+    }
 }
 
 if (-not $AllowRunningPhotoshop) {
