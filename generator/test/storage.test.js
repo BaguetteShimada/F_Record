@@ -3,6 +3,7 @@ const {
     readJsonFile,
     shouldRetryReadJsonError,
     shouldRetryWriteFileAtomicError,
+    writeFileAtomicSyncWithRetry,
 } = require("../src/storage");
 
 function createReadSequence(values) {
@@ -97,3 +98,37 @@ assert.strictEqual(shouldRetryWriteFileAtomicError(accessError), true);
 assert.strictEqual(shouldRetryWriteFileAtomicError(busyError), true);
 assert.strictEqual(shouldRetryWriteFileAtomicError(enoentError), false);
 assert.strictEqual(shouldRetryWriteFileAtomicError(null), false);
+
+const retryWriteCalls = [];
+const retryWriteSleeps = [];
+writeFileAtomicSyncWithRetry("state.json", "{\"ok\":true}", {
+    retryDelays: [3],
+    sleepSync: delay => retryWriteSleeps.push(delay),
+    writeFileAtomicSync: (filePath, data) => {
+        retryWriteCalls.push([filePath, data]);
+        if (retryWriteCalls.length === 1) {
+            throw busyError;
+        }
+    },
+});
+assert.deepStrictEqual(retryWriteCalls, [
+    ["state.json", "{\"ok\":true}"],
+    ["state.json", "{\"ok\":true}"],
+]);
+assert.deepStrictEqual(retryWriteSleeps, [3]);
+
+const failedWriteCalls = [];
+assert.throws(
+    () => writeFileAtomicSyncWithRetry("missing.json", "{}", {
+        retryDelays: [1],
+        sleepSync: () => {
+            throw new Error("should not sleep");
+        },
+        writeFileAtomicSync: () => {
+            failedWriteCalls.push("write");
+            throw enoentError;
+        },
+    }),
+    error => error === enoentError,
+);
+assert.deepStrictEqual(failedWriteCalls, ["write"]);
