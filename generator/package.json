@@ -11,7 +11,7 @@
   },
   "scripts": {
     "build": "webpack --mode production",
-    "test": "node test/recordingLogic.test.js && node test/recordingEventService.test.js && node test/pixmapSettings.test.js && node test/pixmapService.test.js && node test/captureFramePaths.test.js && node test/captureFrameResult.test.js && node test/captureService.test.js && node test/timeSpentEligibility.test.js && node test/timeSpentService.test.js && node test/documentStore.test.js && node test/storage.test.js && node test/captureGate.test.js && node test/pollingTask.test.js && node test/runtimePollingTasks.test.js && node test/runtimePollingService.test.js && node test/documentState.test.js && node test/documentSettingsService.test.js && node test/documentSyncService.test.js && node test/logger.test.js && node test/runtime.test.js"
+    "test": "node test/recordingLogic.test.js && node test/recordingEventService.test.js && node test/pixmapSettings.test.js && node test/pixmapRequestOptions.test.js && node test/pixmapService.test.js && node test/captureFramePaths.test.js && node test/captureFrameResult.test.js && node test/captureService.test.js && node test/timeSpentEligibility.test.js && node test/timeSpentService.test.js && node test/documentStore.test.js && node test/storage.test.js && node test/captureGate.test.js && node test/pollingTask.test.js && node test/runtimePollingTasks.test.js && node test/runtimePollingService.test.js && node test/documentState.test.js && node test/documentSettingsService.test.js && node test/documentSyncService.test.js && node test/logger.test.js && node test/runtime.test.js"
   },
   "devDependencies": {
     "clean-webpack-plugin": "^4.0.0",
