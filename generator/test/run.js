@@ -7,6 +7,7 @@ const testFiles = [
     "pixmapRequestOptions.test.js",
     "pixmapService.test.js",
     "savePixmapSettings.test.js",
+    "savePixmap.test.js",
     "savePixmapValidation.test.js",
     "savePixmapBuffer.test.js",
     "savePixmapPixel.test.js",

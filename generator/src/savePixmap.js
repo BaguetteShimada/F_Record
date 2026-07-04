@@ -20,51 +20,46 @@ const { writeSavePixmapImage } = require("./savePixmapWriter");
  * @returns {Promise<boolean>} - 保存成功返回true
  */
 async function savePixmap(pixmap, filePath, saveSettings) {
-    try {
-        // 参数验证
-        assertValidSavePixmapInput(pixmap, filePath, saveSettings);
-        
-        // 确保saveSettings包含所需属性
-        saveSettings = normalizeSavePixmapSettings(pixmap, saveSettings);
-        
-        // 确保目标目录存在
-        ensureSavePixmapTargetDirectory(filePath);
+    // 参数验证
+    assertValidSavePixmapInput(pixmap, filePath, saveSettings);
 
-        // 从saveSettings中获取参数
-        const { format, quality, extract, padding, backgroundColor } = saveSettings;
-        
-        // 创建目标图像宽高
-        const targetSize = getTargetImageSize(extract, padding);
-        const targetWidth = targetSize.width;
-        const targetHeight = targetSize.height;
-        assertValidTargetImageSize(targetSize);
-        
-        // 根据格式决定填充颜色
-        const formatType = getSavePixmapFormatType(format);
-        // 创建一个临时buffer来存储图像数据
-        const buffer = createInitialSavePixmapBuffer(targetWidth, targetHeight, formatType, backgroundColor);
-        
-        // 批量处理图像数据，调整像素顺序
-        copyPixmapPixelsToRgbaBuffer({
-            backgroundColor,
-            buffer,
-            extract,
-            formatType,
-            padding,
-            pixmap,
-            targetHeight,
-            targetWidth,
-        });
-        
-        // 保存图像
-        const image = createSavePixmapImage(Jimp, targetSize, buffer);
-        await writeSavePixmapImage(image, filePath, formatType, quality);
-        
-        return true;
-    } catch (error) {
-        console.error('保存图像失败:', error);
-        throw error;
-    }
+    // 确保saveSettings包含所需属性
+    saveSettings = normalizeSavePixmapSettings(pixmap, saveSettings);
+
+    // 确保目标目录存在
+    ensureSavePixmapTargetDirectory(filePath);
+
+    // 从saveSettings中获取参数
+    const { format, quality, extract, padding, backgroundColor } = saveSettings;
+
+    // 创建目标图像宽高
+    const targetSize = getTargetImageSize(extract, padding);
+    const targetWidth = targetSize.width;
+    const targetHeight = targetSize.height;
+    assertValidTargetImageSize(targetSize);
+
+    // 根据格式决定填充颜色
+    const formatType = getSavePixmapFormatType(format);
+    // 创建一个临时buffer来存储图像数据
+    const buffer = createInitialSavePixmapBuffer(targetWidth, targetHeight, formatType, backgroundColor);
+
+    // 批量处理图像数据，调整像素顺序
+    copyPixmapPixelsToRgbaBuffer({
+        backgroundColor,
+        buffer,
+        extract,
+        formatType,
+        padding,
+        pixmap,
+        targetHeight,
+        targetWidth,
+    });
+
+    // 保存图像
+    const image = createSavePixmapImage(Jimp, targetSize, buffer);
+    await writeSavePixmapImage(image, filePath, formatType, quality);
+
+    return true;
 }
 
 module.exports = savePixmap;
