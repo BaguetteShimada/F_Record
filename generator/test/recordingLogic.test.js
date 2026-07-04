@@ -1,10 +1,21 @@
 const assert = require("assert");
 const {
+    RECENT_EXPORT_IGNORE_MS,
     applyTimeSpentTick,
     getNextImageName,
+    hasPixelChanges,
     markImageSaved,
+    shouldAddTimeSpent,
     shouldHandleImageChanged,
 } = require("../src/recordingLogic");
+
+assert.strictEqual(RECENT_EXPORT_IGNORE_MS, 2000);
+
+assert.strictEqual(hasPixelChanges({ layers: [{ pixels: true }] }), true);
+assert.strictEqual(hasPixelChanges({ layers: [{ pixels: false }, { pixels: true }] }), true);
+assert.strictEqual(hasPixelChanges({ layers: [{ pixels: false }] }), false);
+assert.strictEqual(hasPixelChanges({ layers: [null, undefined] }), false);
+assert.strictEqual(hasPixelChanges({}), false);
 
 assert.strictEqual(getNextImageName(0), "000001.jpg");
 assert.strictEqual(getNextImageName(12), "000013.jpg");
@@ -30,6 +41,11 @@ assert.deepStrictEqual(
     applyTimeSpentTick({ count: 1, timeSpent: 2, lastModifiedTime: null }, "0", 90 * 1000),
     { count: 1, timeSpent: 2, lastModifiedTime: null },
 );
+
+assert.strictEqual(shouldAddTimeSpent(null, 0, 90 * 1000), false);
+assert.strictEqual(shouldAddTimeSpent(1000, 0, 90 * 1000), true);
+assert.strictEqual(shouldAddTimeSpent(1000, 1, 30 * 1000), true);
+assert.strictEqual(shouldAddTimeSpent(1000, 1, 90 * 1000), false);
 
 const enabledConfig = {
     isEnabled: true,
