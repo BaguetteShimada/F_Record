@@ -7,6 +7,7 @@ const {
 } = require("./savePixmapSettings");
 const { createInitialSavePixmapBuffer } = require("./savePixmapBuffer");
 const { copyPixmapPixelsToRgbaBuffer } = require("./savePixmapCopy");
+const { createSavePixmapImage } = require("./savePixmapImage");
 const { ensureSavePixmapTargetDirectory } = require("./savePixmapTarget");
 const { assertValidSavePixmapInput } = require("./savePixmapValidation");
 const { writeSavePixmapImage } = require("./savePixmapWriter");
@@ -38,9 +39,6 @@ async function savePixmap(pixmap, filePath, saveSettings) {
         const targetHeight = targetSize.height;
         assertValidTargetImageSize(targetSize);
         
-        // 创建一个新的Jimp图像
-        const image = new Jimp(targetWidth, targetHeight);
-        
         // 根据格式决定填充颜色
         const formatType = getSavePixmapFormatType(format);
         // 创建一个临时buffer来存储图像数据
@@ -58,12 +56,8 @@ async function savePixmap(pixmap, filePath, saveSettings) {
             targetWidth,
         });
         
-        // 将buffer数据加载到Jimp图像
-        image.bitmap.data = buffer;
-        image.bitmap.width = targetWidth;
-        image.bitmap.height = targetHeight;
-        
         // 保存图像
+        const image = createSavePixmapImage(Jimp, targetSize, buffer);
         await writeSavePixmapImage(image, filePath, formatType, quality);
         
         return true;
