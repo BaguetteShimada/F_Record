@@ -16,6 +16,10 @@ const cepRuntimeDependencies = [
     "fluent-ffmpeg",
     "write-file-atomic",
 ];
+const excludedNodePackageRootDirectories = new Set([
+    "coverage",
+    "node_modules",
+]);
 
 function main() {
     runProjectInstall("cep");
@@ -93,12 +97,16 @@ function copyNodePackageDirectory(sourcePath, targetPath) {
         dereference: true,
         filter: (source) => {
             const relativePath = path.relative(sourcePath, source);
-            if (relativePath === "") {
-                return true;
-            }
-            return relativePath.split(path.sep)[0] !== "node_modules";
+            return shouldCopyNodePackageEntry(relativePath);
         },
     });
+}
+
+function shouldCopyNodePackageEntry(relativePath) {
+    if (relativePath === "") {
+        return true;
+    }
+    return !excludedNodePackageRootDirectories.has(relativePath.split(path.sep)[0]);
 }
 
 function createGeneratorRelease() {
@@ -159,4 +167,5 @@ module.exports = {
     assertNoBundledExportBinaries,
     cepRuntimeDependencies,
     findBundledExportBinaryEntries,
+    shouldCopyNodePackageEntry,
 };

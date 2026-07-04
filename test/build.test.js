@@ -6,6 +6,7 @@ const AdmZip = require("adm-zip");
 const {
     assertNoBundledExportBinaries,
     findBundledExportBinaryEntries,
+    shouldCopyNodePackageEntry,
 } = require("../build");
 
 const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), "f-record-build-test-"));
@@ -38,6 +39,11 @@ try {
         () => assertNoBundledExportBinaries(bundledZipPath),
         /Bundled ffmpeg\/ffprobe binaries are not allowed/,
     );
+
+    assert.strictEqual(shouldCopyNodePackageEntry(""), true);
+    assert.strictEqual(shouldCopyNodePackageEntry(path.join("lib", "index.js")), true);
+    assert.strictEqual(shouldCopyNodePackageEntry(path.join("coverage", "index.html")), false);
+    assert.strictEqual(shouldCopyNodePackageEntry(path.join("node_modules", "child", "index.js")), false);
 } finally {
     fs.rmSync(tempRoot, { recursive: true, force: true });
 }
