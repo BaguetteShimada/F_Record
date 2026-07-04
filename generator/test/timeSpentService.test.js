@@ -93,6 +93,21 @@ function createMutex(events) {
             }),
             { updated: false, reason: "not-ready" },
         );
+
+        const failedEvents = [];
+        await assert.rejects(
+            () => updateDocumentTimeSpent({
+                configData,
+                nowDocument,
+                mutex: createMutex(failedEvents),
+                nowMsFactory: () => {
+                    throw new Error("clock failed");
+                },
+            }),
+            /clock failed/,
+        );
+        assert.deepStrictEqual(failedEvents, ["lock", "unlock"]);
+        assert.deepStrictEqual(readDocumentValue(documentCreateTime), result.documentValue);
     } finally {
         if (originalUserProfile === undefined) {
             delete process.env.USERPROFILE;
