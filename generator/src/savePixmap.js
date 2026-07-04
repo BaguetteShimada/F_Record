@@ -8,6 +8,7 @@ const {
     normalizeSavePixmapSettings,
 } = require("./savePixmapSettings");
 const { createInitialSavePixmapBuffer } = require("./savePixmapBuffer");
+const { writeArgbPixelToRgbaBuffer } = require("./savePixmapPixel");
 const { assertValidSavePixmapInput } = require("./savePixmapValidation");
 
 /**
@@ -76,31 +77,7 @@ async function savePixmap(pixmap, filePath, saveSettings) {
                 const srcOffset = srcRowOffset + (extract.x + x) * bytesPerPixel;
                 const targetOffset = targetRowStart + x * 4;
                 
-                // 获取Alpha通道值
-                const alpha = pixels[srcOffset];
-                
-                // 如果是完全透明的像素且输出格式是JPG，保留背景色
-                if (formatType !== 'png' && alpha === 0) {
-                    continue; // 跳过处理这个像素，保留背景色
-                }
-                
-                // 正常处理有透明度的像素
-                buffer[targetOffset] = pixels[srcOffset + 1];     // R
-                buffer[targetOffset + 1] = pixels[srcOffset + 2]; // G
-                buffer[targetOffset + 2] = pixels[srcOffset + 3]; // B
-                buffer[targetOffset + 3] = alpha;                 // A
-                
-                // 如果是JPG格式，对半透明像素进行背景混合
-                if (formatType !== 'png' && alpha < 255 && alpha > 0) {
-                    const alphaFactor = alpha / 255;
-                    const bg = backgroundColor || { r: 255, g: 255, b: 255 };
-                    
-                    // 与背景色混合
-                    buffer[targetOffset] = Math.round(buffer[targetOffset] * alphaFactor + bg.r * (1 - alphaFactor));
-                    buffer[targetOffset + 1] = Math.round(buffer[targetOffset + 1] * alphaFactor + bg.g * (1 - alphaFactor));
-                    buffer[targetOffset + 2] = Math.round(buffer[targetOffset + 2] * alphaFactor + bg.b * (1 - alphaFactor));
-                    buffer[targetOffset + 3] = 255; // JPG不支持透明度，设为完全不透明
-                }
+                writeArgbPixelToRgbaBuffer(buffer, targetOffset, pixels, srcOffset, formatType, backgroundColor);
             }
         }
         
