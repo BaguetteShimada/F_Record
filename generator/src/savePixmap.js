@@ -3,7 +3,6 @@ const path = require('path');
 const Jimp = require('jimp');
 const {
     assertValidTargetImageSize,
-    clampJpgQuality,
     getSavePixmapFormatType,
     getTargetImageSize,
     normalizeSavePixmapSettings,
@@ -11,6 +10,7 @@ const {
 const { createInitialSavePixmapBuffer } = require("./savePixmapBuffer");
 const { copyPixmapPixelsToRgbaBuffer } = require("./savePixmapCopy");
 const { assertValidSavePixmapInput } = require("./savePixmapValidation");
+const { writeSavePixmapImage } = require("./savePixmapWriter");
 
 /**
  * 将Photoshop像素数据保存为图像文件
@@ -67,16 +67,8 @@ async function savePixmap(pixmap, filePath, saveSettings) {
         image.bitmap.width = targetWidth;
         image.bitmap.height = targetHeight;
         
-        // 设置图像质量 (Jimp质量范围是0-100，Photoshop也是0-100)
-        const jpgQuality = clampJpgQuality(quality);
-        
         // 保存图像
-        if (formatType === 'png') {
-            await image.writeAsync(filePath);
-        } else {
-            // 默认为JPEG
-            await image.quality(jpgQuality).writeAsync(filePath);
-        }
+        await writeSavePixmapImage(image, filePath, formatType, quality);
         
         return true;
     } catch (error) {
