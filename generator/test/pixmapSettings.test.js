@@ -1,5 +1,38 @@
 const assert = require("assert");
-const { createPixmapSettings } = require("../src/pixmapSettings");
+const {
+    calculateMaxDimension,
+    calculateScale,
+    createPixmapSettings,
+    createSaveSettings,
+} = require("../src/pixmapSettings");
+
+assert.strictEqual(
+    calculateScale({ left: 0, top: 0, right: 1920, bottom: 1080 }, "540"),
+    0.5,
+);
+assert.strictEqual(
+    calculateScale({ left: 0, top: 0, right: 100, bottom: 100 }, "1000"),
+    1,
+);
+assert.strictEqual(
+    calculateMaxDimension({ left: 10, top: 20, right: 90, bottom: 80 }, 0.5),
+    40,
+);
+
+assert.deepStrictEqual(
+    createSaveSettings(
+        { left: 0, top: 0, right: 100, bottom: 100 },
+        { left: 10, top: 20, right: 90, bottom: 80 },
+        1,
+        "70",
+    ),
+    {
+        format: "jpg",
+        quality: 70,
+        padding: { left: 10, top: 20, right: 10, bottom: 20 },
+        extract: { x: 0, y: 0, width: 80, height: 60 },
+    },
+);
 
 assert.deepStrictEqual(
     createPixmapSettings(
