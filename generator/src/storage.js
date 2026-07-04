@@ -1,6 +1,8 @@
 const fs = require("fs");
 const writeFileAtomic = require("write-file-atomic");
 
+const DEFAULT_READ_JSON_RETRY_DELAYS = [20, 50];
+const DEFAULT_WRITE_FILE_RETRY_DELAYS = [20, 50, 100, 200, 500];
 const TRANSIENT_FILE_ERROR_CODES = ["EPERM", "EACCES", "EBUSY"];
 
 function pathExists(targetPath, fsImpl) {
@@ -16,7 +18,7 @@ function ensureDirectory(directoryPath, options) {
 
 function readJsonFile(filePath, options) {
     const fsImpl = options && options.fs ? options.fs : fs;
-    const retryDelays = options && options.retryDelays ? options.retryDelays : [20, 50];
+    const retryDelays = options && options.retryDelays ? options.retryDelays : DEFAULT_READ_JSON_RETRY_DELAYS;
     const sleepSyncFn = options && options.sleepSync ? options.sleepSync : sleepSync;
 
     if (!pathExists(filePath, fsImpl)) {
@@ -45,7 +47,7 @@ function writeFileAtomicSyncWithRetry(filePath, data, options) {
     const writeFileAtomicSync = options && options.writeFileAtomicSync
         ? options.writeFileAtomicSync
         : writeFileAtomic.sync;
-    const retryDelays = options && options.retryDelays ? options.retryDelays : [20, 50, 100, 200, 500];
+    const retryDelays = options && options.retryDelays ? options.retryDelays : DEFAULT_WRITE_FILE_RETRY_DELAYS;
     const sleepSyncFn = options && options.sleepSync ? options.sleepSync : sleepSync;
     let lastError = null;
     for (let i = 0; i <= retryDelays.length; i++) {

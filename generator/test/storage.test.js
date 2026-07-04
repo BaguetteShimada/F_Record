@@ -61,6 +61,22 @@ assert.deepStrictEqual(
 assert.deepStrictEqual(syntaxThenValid.calls, ["read", "read"]);
 assert.deepStrictEqual(syntaxSleeps, [1]);
 
+const defaultReadRetry = createReadSequence([
+    "{",
+    "{",
+    JSON.stringify({ ok: true }),
+]);
+const defaultReadSleeps = [];
+assert.deepStrictEqual(
+    readJsonFile("defaultReadRetry.json", {
+        fs: defaultReadRetry.fs,
+        sleepSync: delay => defaultReadSleeps.push(delay),
+    }),
+    { ok: true },
+);
+assert.deepStrictEqual(defaultReadRetry.calls, ["read", "read", "read"]);
+assert.deepStrictEqual(defaultReadSleeps, [20, 50]);
+
 const busyError = new Error("busy");
 busyError.code = "EBUSY";
 const busyThenValid = createReadSequence([
@@ -139,6 +155,20 @@ assert.deepStrictEqual(retryWriteCalls, [
     ["state.json", "{\"ok\":true}"],
 ]);
 assert.deepStrictEqual(retryWriteSleeps, [3]);
+
+const defaultWriteCalls = [];
+const defaultWriteSleeps = [];
+writeFileAtomicSyncWithRetry("defaultWriteRetry.json", "{}", {
+    sleepSync: delay => defaultWriteSleeps.push(delay),
+    writeFileAtomicSync: () => {
+        defaultWriteCalls.push("write");
+        if (defaultWriteCalls.length < 3) {
+            throw busyError;
+        }
+    },
+});
+assert.deepStrictEqual(defaultWriteCalls, ["write", "write", "write"]);
+assert.deepStrictEqual(defaultWriteSleeps, [20, 50]);
 
 const failedWriteCalls = [];
 assert.throws(
