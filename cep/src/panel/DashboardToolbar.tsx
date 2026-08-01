@@ -28,7 +28,7 @@ function DashboardToolbar({
     const { t } = useTranslation();
 
     return (
-        <div className="fr-dashboard-toolbar">
+        <div className="fr-panel-section fr-dashboard-toolbar">
             <RecordToggleButton
                 isEnabled={configData.current.isEnabled}
                 enabledLabel={t('Enabled')}

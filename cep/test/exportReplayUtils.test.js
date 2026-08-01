@@ -107,6 +107,14 @@ try {
         calculateExportProgress(statusInfo, 3, 2),
         { status: "saving video...", percent: 100 },
     );
+    assert.deepStrictEqual(
+        calculateExportProgress(statusInfo, 1, undefined),
+        { status: "generating video...", percent: 10 },
+    );
+    assert.deepStrictEqual(
+        calculateExportProgress(statusInfo, 1, Number.NaN),
+        { status: "generating video...", percent: 10 },
+    );
 
     const error = new Error("ffmpeg failed");
     error.code = "FFMPEG";

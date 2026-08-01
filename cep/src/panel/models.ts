@@ -53,6 +53,11 @@ export interface ExportReplayParams {
     exportTempFolderPath: string;
 }
 
+export const VALID_RESOLUTIONS = ["360", "720", "1080", "1440"] as const;
+export const VALID_QUALITIES = ["20", "70", "90"] as const;
+export const VALID_IDLE_TIMEOUTS = ["0", "1", "5", "10", "30"] as const;
+export const VALID_LANGUAGES = ["cn", "en"] as const;
+
 type UnknownRecord = Record<string, unknown>;
 
 function isRecord(value: unknown): value is UnknownRecord {
@@ -61,6 +66,13 @@ function isRecord(value: unknown): value is UnknownRecord {
 
 function readString(value: unknown, fallback: string): string {
     return typeof value === "string" ? value : fallback;
+}
+
+function readStringOption<T extends readonly string[]>(value: unknown, fallback: string, validValues: T): T[number] | string {
+    if (typeof value !== "string") {
+        return fallback;
+    }
+    return (validValues as readonly string[]).includes(value) ? value : fallback;
 }
 
 function readNullableString(value: unknown, fallback: string | null): string | null {
@@ -163,12 +175,28 @@ export function normalizeConfigData(value: unknown, fallback: ConfigData = creat
     return {
         isEnabled: readBoolean(value.isEnabled, fallback.isEnabled),
         processImageFolderPath: readString(value.processImageFolderPath, fallback.processImageFolderPath),
-        resolution: readString(value.resolution, fallback.resolution),
-        quality: readString(value.quality, fallback.quality),
-        idleTimeout: readString(value.idleTimeout, fallback.idleTimeout),
-        language: readString(value.language, fallback.language),
+        resolution: normalizeResolution(value.resolution, fallback.resolution),
+        quality: normalizeQuality(value.quality, fallback.quality),
+        idleTimeout: normalizeIdleTimeout(value.idleTimeout, fallback.idleTimeout),
+        language: normalizeLanguage(value.language, fallback.language),
         lastExportTime: readNullableNumber(value.lastExportTime, fallback.lastExportTime),
     };
+}
+
+export function normalizeResolution(value: unknown, fallback = createDefaultConfigData().resolution): string {
+    return readStringOption(value, fallback, VALID_RESOLUTIONS);
+}
+
+export function normalizeQuality(value: unknown, fallback = createDefaultConfigData().quality): string {
+    return readStringOption(value, fallback, VALID_QUALITIES);
+}
+
+export function normalizeIdleTimeout(value: unknown, fallback = createDefaultConfigData().idleTimeout): string {
+    return readStringOption(value, fallback, VALID_IDLE_TIMEOUTS);
+}
+
+export function normalizeLanguage(value: unknown, fallback = createDefaultConfigData().language): string {
+    return readStringOption(value, fallback, VALID_LANGUAGES);
 }
 
 export function normalizeCurrentDocumentValue(

@@ -44,6 +44,7 @@ function createRuntime(dependencies) {
     const mutex = new Mutex();
     const captureGate = deps.createCaptureGate();
     let pollingService = null;
+    let removeImageChangedListener = null;
 
     async function updateDocumentTimeSpent() {
         await deps.updateDocumentTimeSpent({
@@ -84,7 +85,36 @@ function createRuntime(dependencies) {
         }
     }
 
+    function addImageChangedListener(handler) {
+        const generator = _generator;
+        const unsubscribe = generator.addPhotoshopEventListener("imageChanged", handler);
+        if (typeof unsubscribe === "function") {
+            removeImageChangedListener = unsubscribe;
+            return;
+        }
+        if (typeof generator.removePhotoshopEventListener === "function") {
+            removeImageChangedListener = () => {
+                generator.removePhotoshopEventListener("imageChanged", handler);
+            };
+            return;
+        }
+        removeImageChangedListener = null;
+    }
+
+    function stopImageChangedListener() {
+        if (removeImageChangedListener !== null) {
+            removeImageChangedListener();
+            removeImageChangedListener = null;
+        }
+    }
+
+    function stop() {
+        stopPollingTasks();
+        stopImageChangedListener();
+    }
+
     function init(generator, config) {
+        stop();
         _generator = generator;
         _logger = deps.createLogger(_generator._logger);
         const handleImageChanged = deps.createImageChangedHandler({
@@ -99,14 +129,13 @@ function createRuntime(dependencies) {
             saveCaptureFrame: deps.saveCaptureFrame,
             shouldHandleImageChanged: deps.shouldHandleImageChanged,
         });
-        stopPollingTasks();
+        addImageChangedListener(handleImageChanged);
         startPollingTasks();
-        _generator.addPhotoshopEventListener("imageChanged", handleImageChanged);
     }
 
     return {
         init,
-        stop: stopPollingTasks,
+        stop,
     };
 }
 

@@ -6,7 +6,8 @@ export type ExportErrorCode =
     | "PROCESS_IMAGE_FOLDER_EMPTY"
     | "RECORDED_IMAGE_FOLDER_MISSING"
     | "EXPORT_IMAGE_FILES_EMPTY"
-    | "EXPORT_VALID_IMAGE_FILES_EMPTY";
+    | "EXPORT_VALID_IMAGE_FILES_EMPTY"
+    | "MISSING_NODE_RUNTIME";
 
 interface CodedError extends Error {
     code?: string;
@@ -29,6 +30,7 @@ const exportErrorMessageKeys: Record<ExportErrorCode, string> = {
     RECORDED_IMAGE_FOLDER_MISSING: "Export error recorded folder missing",
     EXPORT_IMAGE_FILES_EMPTY: "Export error image files empty",
     EXPORT_VALID_IMAGE_FILES_EMPTY: "Export error image files empty",
+    MISSING_NODE_RUNTIME: "Export node runtime missing",
 };
 
 export function createExportError(code: ExportErrorCode, message: string): Error {

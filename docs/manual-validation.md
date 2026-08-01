@@ -1,6 +1,6 @@
 # F_Record 手动验证清单
 
-这份清单用于验证 `refactor` 分支在真实 Photoshop 环境中的兼容性。当前自动化测试只能覆盖纯逻辑、构建和打包，不能替代 Photoshop 2022-2025 的人工验证。
+这份清单用于验证当前版本在真实 Photoshop 环境中的兼容性。当前自动化测试只能覆盖纯逻辑、构建和打包，不能替代 Photoshop 2022-2025 的人工验证。
 
 ## 1. 构建产物
 
@@ -10,7 +10,8 @@
    pnpm run check
    ```
 2. 确认生成 `dist/F_Record.zip`。
-3. 确认 zip 内只有：
+3. 确认 zip 顶层只有：
+   - `installPhotoshopPlugin.ps1`
    - `com.f_know.f_record.cep`
    - `com.f_know.f_record.generator`
 4. 确认 zip 内包含 CEP manifest、CEP index、导出脚本、Generator index 和 Generator package。
@@ -27,16 +28,17 @@
 | Photoshop 2022 | Windows 10 或 11 | 待验证 |
 | Photoshop 2023 | Windows 10 或 11 | 待验证 |
 | Photoshop 2024 | Windows 10 或 11 | 待验证 |
-| Photoshop 2025 | Windows 10 或 11 | 待验证 |
+| Photoshop 2025 | Windows 10 或 11 | 26.9 / CEP 12 / Generator Core 3.12.1 自动预检通过；应用内待验证 |
 
 每个版本都按 README 安装：
 
 1. 关闭 Photoshop。
 2. 用管理员 PowerShell 运行安装脚本：
    ```powershell
-   .\scripts\installPhotoshopPlugin.ps1 -PhotoshopRoot "C:\Program Files\Adobe\Adobe Photoshop 2022"
+   .\scripts\installPhotoshopPlugin.ps1 -PhotoshopRoot "C:\Program Files\Adobe\Adobe Photoshop 2025"
    ```
    如需验证其他版本，把 `PhotoshopRoot` 改成对应 Photoshop 主目录。
+   安装前可追加 `-WhatIf` 做无写入预检；脚本会验证 `Photoshop.exe` 的实际版本及构建包中的 CEP Host 范围。
    非管理员 PowerShell 应在写权限预检阶段失败，并提示以管理员身份重试，不应移动现有插件目录。
 3. 在 Photoshop 首选项中启用 Generator 和旧版扩展面板。
 4. 从 `窗口 -> 扩展(旧版)` 打开 F_Record。
@@ -66,7 +68,28 @@
 
 预期结果：插件不再依赖自带 ffmpeg 二进制，缺失时错误可理解。
 
-## 4. 录制流程
+## 4. 系统 Node.js
+
+导出视频会启动独立的 Node.js worker。验证三种场景：
+
+1. PATH 可用：
+   ```powershell
+   node -v
+   ```
+   导出视频应成功。
+
+2. PATH 不可用，但设置环境变量：
+   ```powershell
+   setx F_RECORD_NODE_PATH "C:\Program Files\nodejs\node.exe"
+   ```
+   重启 Photoshop 后导出视频应成功。
+
+3. PATH 和环境变量都不可用：
+   导出时应出现明确提示：Node.js 不可用，并可点开详情查看错误信息。
+
+预期结果：Node worker 启动失败时不会卡住导出，错误提示包含 `F_RECORD_NODE_PATH` 的处理方式。
+
+## 5. 录制流程
 
 1. 新建文档。
 2. 打开 F_Record 面板。
@@ -83,7 +106,7 @@
 - 重启 Photoshop 后配置仍保持。
 - 计数、用时、当前文档信息能刷新。
 
-## 5. 设置流程
+## 6. 设置流程
 
 逐项修改并重启 Photoshop 验证持久化：
 
@@ -95,7 +118,7 @@
 
 预期结果：设置保存到现有 `%APPDATA%\F_Record` JSON 文件，不需要迁移用户已有数据。
 
-## 6. 导出流程
+## 7. 导出流程
 
 1. 对已有记录的文档点击导出。
 2. 分别选择 16:9、4:3、1:1、3:4、9:16、画布比例。
@@ -110,8 +133,9 @@
 - 视频尺寸为偶数宽高。
 - 没有有效记录图片时显示明确错误。
 - 损坏 JPG 被跳过后，仍能用连续编号生成视频。
+- ffmpeg 或 Node worker 失败时，导出能超时/失败返回，不会一直卡在进度中。
 
-## 7. 数据兼容
+## 8. 数据兼容
 
 用旧版本已经生成过的 `%APPDATA%\F_Record` 数据验证：
 
@@ -122,7 +146,7 @@
 
 预期结果：新版本能读取旧 JSON，缺失或新增字段会使用默认值，不要求用户手动迁移。
 
-## 8. 回滚
+## 9. 回滚
 
 如果验证失败：
 

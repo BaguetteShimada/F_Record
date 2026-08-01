@@ -18,6 +18,17 @@ function loadSettingsOptionsModule() {
     const context = {
         module,
         exports: module.exports,
+        require(request) {
+            if (request === "./models") {
+                return {
+                    VALID_RESOLUTIONS: ["360", "720", "1080", "1440"],
+                    VALID_QUALITIES: ["20", "70", "90"],
+                    VALID_IDLE_TIMEOUTS: ["0", "1", "5", "10", "30"],
+                    VALID_LANGUAGES: ["cn", "en"],
+                };
+            }
+            throw new Error(`Unexpected require: ${request}`);
+        },
     };
     vm.runInNewContext(compiled.outputText, context, { filename: modulePath });
     return module.exports;

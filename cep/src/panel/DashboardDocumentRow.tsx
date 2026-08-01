@@ -21,16 +21,17 @@ function DashboardDocumentRow({
     onOpenFolder,
 }: DashboardDocumentRowProps) {
     return (
-        <div className="fr-data-row">
-            <div className="fr-row-label">
+        <div className="fr-field-row fr-data-row">
+            <div className="fr-field-label fr-row-label">
                 <DocumentOutline size="S" />
                 <Text>{label}</Text>
             </div>
-            <div className="fr-document-value">
+            <div className="fr-field-control fr-control-group fr-document-value">
                 <TextField
                     width="100%"
                     value={value}
                     isReadOnly
+                    UNSAFE_className="fr-control-field fr-document-name-field"
                 />
                 {showOpenButton && (
                     <TooltipTrigger delay={0}>
@@ -38,7 +39,7 @@ function DashboardDocumentRow({
                             aria-label="Open Current Document Process Image Folder"
                             onPress={onOpenFolder}
                             isDisabled={isOpenButtonDisabled}
-                            UNSAFE_className="fr-document-folder-button"
+                            UNSAFE_className="fr-icon-button fr-document-folder-button"
                         >
                             <FolderOpen />
                         </ActionButton>

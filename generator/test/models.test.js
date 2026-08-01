@@ -32,6 +32,9 @@ const {
     createDefaultDocumentValue,
     createDefaultNowDocument,
     normalizeConfigData,
+    normalizeIdleTimeout,
+    normalizeQuality,
+    normalizeResolution,
     normalizeDocumentValue,
 } = loadModelsModule();
 
@@ -83,22 +86,28 @@ assert.deepStrictEqual(
     normalize(normalizeConfigData({
         isEnabled: true,
         processImageFolderPath: "C:/recordings",
-        resolution: 123,
-        quality: "90",
-        idleTimeout: "0",
-        language: "en",
+        resolution: "9999",
+        quality: "100",
+        idleTimeout: "bad",
+        language: "jp",
         lastExportTime: Number.POSITIVE_INFINITY,
     }, fallbackConfig)),
     {
         isEnabled: true,
         processImageFolderPath: "C:/recordings",
         resolution: "1080",
-        quality: "90",
-        idleTimeout: "0",
-        language: "en",
+        quality: "70",
+        idleTimeout: "1",
+        language: "cn",
         lastExportTime: null,
     },
 );
+assert.strictEqual(normalizeResolution("720"), "720");
+assert.strictEqual(normalizeResolution("bad"), "1080");
+assert.strictEqual(normalizeQuality("90"), "90");
+assert.strictEqual(normalizeQuality("bad"), "70");
+assert.strictEqual(normalizeIdleTimeout("0"), "0");
+assert.strictEqual(normalizeIdleTimeout("bad"), "1");
 assert.notStrictEqual(normalizeConfigData(null, fallbackConfig), fallbackConfig);
 assert.deepStrictEqual(normalize(normalizeConfigData(null, fallbackConfig)), fallbackConfig);
 

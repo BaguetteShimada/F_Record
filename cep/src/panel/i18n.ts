@@ -1,7 +1,7 @@
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
 
-const resources = {
+export const resources = {
   en: {
     translation: {
       'Dashboard': 'Dashboard',
@@ -28,6 +28,7 @@ const resources = {
       'Open Process Image Folder': 'Open Process Image Folder',
       'Export': 'Export',
       'Select Process Image Folder': 'Select Process Image Folder',
+      'Select Export Path': 'Select Export Path',
       'The higher the Quality you select, the lower the compression rate applied to the image.': 'The higher the Quality you select, the lower the compression rate applied to the image.',
       'When the time elapsed since the last painting exceeds the preset duration, the timer will automatically stop.': 'When the time elapsed since the last painting exceeds the preset duration, the timer will automatically stop.',
       'Aspect Ratio': 'Aspect Ratio',
@@ -39,6 +40,7 @@ const resources = {
       'Export success': 'Export success',
       'Export failed': 'Export failed',
       'Export binary missing': '{{binaryName}} is not available. Check ffmpeg installation.',
+      'Export node runtime missing': 'Node.js is not available. Install Node.js or set F_RECORD_NODE_PATH to node.exe.',
       'Export error no active document': 'No active document to export.',
       'Export error document bounds unavailable': 'Document bounds are unavailable.',
       'Export error no recorded images': 'No recorded images to export.',
@@ -80,6 +82,7 @@ const resources = {
       'Open Process Image Folder': '打开过程图片文件夹',
       'Export': '导出',
       'Select Process Image Folder': '选择过程图片文件夹',
+      'Select Export Path': '选择导出路径',
       'The higher the Quality you select, the lower the compression rate applied to the image.': '选择的质量越高，图片的压缩率越低。',
       'When the time elapsed since the last painting exceeds the preset duration, the timer will automatically stop.': '当距离上一次绘画的时间超过了这个时间，会自动停止计时',
       'Aspect Ratio': '宽高比',
@@ -91,6 +94,7 @@ const resources = {
       'Export success': '导出成功',
       'Export failed': '导出失败',
       'Export binary missing': '{{binaryName}} 不可用，请检查 ffmpeg 安装。',
+      'Export node runtime missing': 'Node.js 不可用，请安装 Node.js，或将 F_RECORD_NODE_PATH 设置为 node.exe 的完整路径。',
       'Export error no active document': '没有可导出的活动文档。',
       'Export error document bounds unavailable': '无法读取文档边界。',
       'Export error no recorded images': '没有可导出的记录图片。',

@@ -15,7 +15,7 @@ function GitHubLinkButton({ onError }: GitHubLinkButtonProps) {
                 onPress={() => {
                     openExternalUrl(GITHUB_REPOSITORY_URL, onError);
                 }}
-                UNSAFE_className="fr-github-button"
+                UNSAFE_className="fr-icon-button fr-github-button"
             >
                 <GitHubIcon />
             </ActionButton>

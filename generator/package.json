@@ -1,6 +1,6 @@
 {
   "name": "f_record-generator",
-  "version": "3.1.0",
+  "version": "3.2.0",
   "author": "F_know",
   "main": "src/index.js",
   "generator-core-version": "1 - 4.1",
@@ -9,8 +9,8 @@
     "write-file-atomic": "^3.0.3"
   },
   "scripts": {
-    "build": "webpack --mode production",
-    "test": "node test/run.js"
+    "build": "powershell -NoProfile -ExecutionPolicy Bypass -File ../scripts/run-node.ps1 node_modules/webpack/bin/webpack.js --mode production",
+    "test": "powershell -NoProfile -ExecutionPolicy Bypass -File ../scripts/run-node.ps1 test/run.js"
   },
   "devDependencies": {
     "clean-webpack-plugin": "^4.0.0",

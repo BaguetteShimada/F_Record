@@ -19,8 +19,8 @@ function SettingsPickerRow({
     helpText,
 }: SettingsPickerRowProps) {
     return (
-        <div className="fr-settings-row">
-            <div className="fr-settings-label">
+        <div className="fr-field-row fr-settings-row">
+            <div className="fr-field-label fr-settings-label">
                 {helpText ? (
                     <>
                         <Text marginEnd="size-100">{label}</Text>
@@ -39,6 +39,7 @@ function SettingsPickerRow({
                 selectedKey={selectedKey}
                 onSelectionChange={onSelectionChange}
                 width="size-1200"
+                UNSAFE_className="fr-control-picker fr-settings-picker"
             >
                 {children}
             </Picker>

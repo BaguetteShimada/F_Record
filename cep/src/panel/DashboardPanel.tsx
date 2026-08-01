@@ -38,7 +38,7 @@ function DashboardPanel({
     const { t } = useTranslation();
 
     return(
-        <div className="fr-dashboard">
+        <div className="fr-panel-page fr-dashboard">
             <DashboardToolbar
                 configData={configData}
                 documentValue={documentValue}
@@ -49,7 +49,7 @@ function DashboardPanel({
                 onExportSettingsChange={onExportSettingsChange}
                 onError={onError}
             />
-            <div className="fr-dashboard-section">
+            <div className="fr-panel-section fr-dashboard-section">
                 <DashboardDocumentRow
                     label={t('Document')}
                     value={getDocumentNameDisplayValue(documentValue)}
@@ -75,7 +75,7 @@ function DashboardPanel({
                     })}
                 />
             </div>
-            <div className="fr-community-links">
+            <div className="fr-panel-footer fr-community-links">
                 <GitHubLinkButton onError={onError} />
             </div>
         </div>

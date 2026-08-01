@@ -8,6 +8,8 @@ const {
 
 function createFakeWorker(onSend) {
     const worker = new EventEmitter();
+    worker.stdout = new EventEmitter();
+    worker.stderr = new EventEmitter();
     worker.sentMessages = [];
     worker.disconnected = false;
     worker.killed = false;
@@ -136,12 +138,56 @@ function createFakeWorker(onSend) {
             {},
             () => {},
             {
+                timeoutMs: 1,
+                spawn: () => createFakeWorker(() => {}),
+            },
+        ),
+        error => error.code === "EXPORT_WORKER_TIMEOUT" && /timed out/.test(error.message),
+    );
+
+    await assert.rejects(
+        () => runExportReplayWorker(
+            {},
+            () => {},
+            {
+                spawn: () => createFakeWorker((worker) => {
+                    process.nextTick(() => {
+                        worker.stderr.emit("data", "ffmpeg stderr");
+                        worker.emit("exit", 7);
+                    });
+                }),
+            },
+        ),
+        error => /Worker exited with code 7/.test(error.message) && /ffmpeg stderr/.test(error.message),
+    );
+
+    await assert.rejects(
+        () => runExportReplayWorker(
+            {},
+            () => {},
+            {
                 spawn: () => {
                     throw new Error("spawn failed");
                 },
             },
         ),
         /spawn failed/,
+    );
+
+    await assert.rejects(
+        () => runExportReplayWorker(
+            {},
+            () => {},
+            {
+                nodeCommand: "missing-node.exe",
+                spawn: () => {
+                    const error = new Error("not found");
+                    error.code = "ENOENT";
+                    throw error;
+                },
+            },
+        ),
+        error => error.code === "MISSING_NODE_RUNTIME" && /F_RECORD_NODE_PATH/.test(error.message),
     );
 
     const restoredError = toWorkerError({
@@ -159,13 +205,32 @@ function createFakeWorker(onSend) {
     assert.strictEqual(
         resolveNodeCommand({
             env: { F_RECORD_NODE_PATH: `"C:\\Tools\\node.exe"` },
+            fs: {
+                statSync(filePath) {
+                    assert.strictEqual(filePath, "C:\\Tools\\node.exe");
+                    return { isFile: () => true };
+                },
+            },
             platform: "win32",
         }),
         "C:\\Tools\\node.exe",
     );
 
+    assert.throws(
+        () => resolveNodeCommand({
+            env: { F_RECORD_NODE_PATH: "C:\\Missing\\node.exe" },
+            fs: {
+                statSync() {
+                    throw new Error("not found");
+                },
+            },
+            platform: "win32",
+        }),
+        error => error.code === "MISSING_NODE_RUNTIME" && /C:\\Missing\\node\.exe/.test(error.message),
+    );
+
     const fakeFiles = new Set([
-        "C:\\Program Files\\Adobe\\Adobe Photoshop 2022\\node.exe",
+        "C:\\Program Files\\Adobe\\Adobe Photoshop 2025\\node.exe",
     ]);
     const fakeFs = {
         statSync(filePath) {
@@ -177,17 +242,17 @@ function createFakeWorker(onSend) {
     };
     assert.strictEqual(
         resolveNodeCommand({
-            baseDir: "C:\\Program Files\\Adobe\\Adobe Photoshop 2022\\Required\\CEP\\extensions\\com.f_know.f_record.cep\\js",
+            baseDir: "C:\\Program Files\\Adobe\\Adobe Photoshop 2025\\Required\\CEP\\extensions\\com.f_know.f_record.cep\\js",
             env: {},
             fs: fakeFs,
             platform: "win32",
         }),
-        "C:\\Program Files\\Adobe\\Adobe Photoshop 2022\\node.exe",
+        "C:\\Program Files\\Adobe\\Adobe Photoshop 2025\\node.exe",
     );
 
     assert.strictEqual(
         resolveNodeCommand({
-            baseDir: "C:\\Program Files\\Adobe\\Adobe Photoshop 2022\\Required\\CEP\\extensions\\com.f_know.f_record.cep\\js",
+            baseDir: "C:\\Program Files\\Adobe\\Adobe Photoshop 2025\\Required\\CEP\\extensions\\com.f_know.f_record.cep\\js",
             env: {},
             fs: {
                 statSync() {

@@ -8,7 +8,7 @@ https://github.com/user-attachments/assets/0221cee9-ac70-48d1-b85a-b85667813b90
 
 **Plugin Principle**: It uses Photoshop's Generator interface. Whenever there is a change on the canvas, it captures a snapshot. In the end, these snapshots are combined into a single video.
 
-**Current Plugin Version**: 3.1.0
+**Current Plugin Version**: 3.2.0
 
 **Supported Operating Systems**: Windows 
 
@@ -23,22 +23,34 @@ https://github.com/user-attachments/assets/0221cee9-ac70-48d1-b85a-b85667813b90
 1. Install ffmpeg, and make sure `ffmpeg` and `ffprobe` can be run from the system environment.
    The recommended setup is to add ffmpeg's `bin` directory to the Windows `PATH`. If you do not want to change `PATH`, set `F_RECORD_FFMPEG_PATH` and `F_RECORD_FFPROBE_PATH` to the full paths of `ffmpeg.exe` and `ffprobe.exe`.
 
-2. Download the plugin zip file [F_Record.zip](https://github.com/BaguetteShimada/F_Record/releases/download/3.1.0/F_Record.zip), extract it, and open the folder.
+2. Exporting video starts a separate Node.js worker. Make sure `node` can be run from the system environment, or set `F_RECORD_NODE_PATH` to the full path of `node.exe`.
 
-3. Inside, you will find two folders: `com.f_know.f_record.cep` and `com.f_know.f_record.generator`. Copy them into the corresponding locations in your main Photoshop directory.
-   The main Photoshop directory typically looks like `D:\Adobe Photoshop 2022`.
-   You can tell if it’s the correct directory if you see the Photoshop executable `Photoshop.exe` (not a shortcut).
+3. Download the [F_Record.zip](https://github.com/BaguetteShimada/F_Record/releases/download/3.2.0/F_Record.zip) Release asset and extract it. Do not download GitHub's automatically generated `Source code` archives; they are not installable plugin packages.
 
-   - Place the `com.f_know.f_record.cep` folder in the path similar to `D:\Adobe Photoshop 2022\Required\CEP\extensions`.
-   - Place the `com.f_know.f_record.generator` folder in the path similar to `D:\Adobe Photoshop 2022\Plug-ins\Generator`.
+4. Close Photoshop. Open an **administrator PowerShell** in the extracted directory and run:
 
-   Note: If your Photoshop installation is missing a certain subfolder (like `Generator` under `Plug-ins`), you may need to create it manually.
+   ```powershell
+   powershell -NoProfile -ExecutionPolicy Bypass -File .\installPhotoshopPlugin.ps1
+   ```
 
-4. Open Photoshop, then go to **Edit → Preferences → Plugins**. Check whether **Enable Generator** and **Load Extension Panels** are selected.
+   The script installs to `C:\Program Files\Adobe\Adobe Photoshop 2025` by default and validates the Photoshop version, plugin manifest, and destination directories. If Photoshop is installed elsewhere, specify its path:
+
+   ```powershell
+   powershell -NoProfile -ExecutionPolicy Bypass -File .\installPhotoshopPlugin.ps1 -PhotoshopRoot "D:\Adobe Photoshop 2025"
+   ```
+
+5. If the installer script cannot be used, you can follow the same manual two-folder layout used by the Photoshop 2022 package. Copy the two plugin folders from the extracted directory into the matching locations under the Photoshop installation directory. The Photoshop directory typically looks like `D:\Adobe Photoshop 2025` (use the corresponding year for another supported version) and must contain the actual `Photoshop.exe`, not a shortcut.
+
+   - Copy `com.f_know.f_record.cep` to `D:\Adobe Photoshop 2025\Required\CEP\extensions`.
+   - Copy `com.f_know.f_record.generator` to `D:\Adobe Photoshop 2025\Plug-ins\Generator`.
+
+   Create the `extensions` or `Generator` directory if it does not already exist.
+
+6. Open Photoshop, then go to **Edit → Preferences → Plugins**. Check whether **Enable Generator** and **Load Extension Panels** are selected.
    - If they are not checked, select them and restart Photoshop.
    - If they are already checked, there’s no need to restart.
 
-5. Finally, go to **Window → Extensions (legacy)** in Photoshop. You should see the plugin listed there. Click on it to start using it.
+7. Finally, go to **Window → Extensions (legacy)** in Photoshop. You should see the plugin listed there. Click on it to start using it.
 
 ## Usage Instructions
 

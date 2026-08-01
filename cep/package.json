@@ -1,11 +1,11 @@
 {
   "name": "f_record_cep",
-  "version": "3.1.0",
+  "version": "3.2.0",
   "author": "F_know",
   "scripts": {
-    "build": "webpack --config webpack.cep.config.js --mode production",
-    "typecheck": "tsc --project tsconfig.cep.json --noEmit",
-    "test": "node test/run.js"
+    "build": "powershell -NoProfile -ExecutionPolicy Bypass -File ../scripts/run-node.ps1 node_modules/webpack/bin/webpack.js --config webpack.cep.config.js --mode production",
+    "typecheck": "powershell -NoProfile -ExecutionPolicy Bypass -File ../scripts/run-node.ps1 node_modules/typescript/bin/tsc --project tsconfig.cep.json --noEmit",
+    "test": "powershell -NoProfile -ExecutionPolicy Bypass -File ../scripts/run-node.ps1 test/run.js"
   },
   "dependencies": {
     "@adobe/react-spectrum": "^3.40.0",

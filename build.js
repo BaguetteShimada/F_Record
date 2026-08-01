@@ -17,13 +17,16 @@ const cepRuntimeDependencies = [
     "write-file-atomic",
 ];
 const releaseZipRequiredEntries = [
+    "installPhotoshopPlugin.ps1",
     "com.f_know.f_record.cep/CSXS/manifest.xml",
     "com.f_know.f_record.cep/index.html",
     "com.f_know.f_record.cep/index.js",
     "com.f_know.f_record.cep/init.jsx",
     "com.f_know.f_record.cep/package.json",
     "com.f_know.f_record.cep/js/exportReplay.js",
+    "com.f_know.f_record.cep/js/exportReplayUtils.js",
     "com.f_know.f_record.cep/js/exportReplayWorker.js",
+    "com.f_know.f_record.cep/js/localPathOpener.js",
     "com.f_know.f_record.generator/index.js",
     "com.f_know.f_record.generator/package.json",
 ];
@@ -144,6 +147,11 @@ function createGeneratorRelease() {
 
 function createZip() {
     const zip = new AdmZip();
+    zip.addLocalFile(
+        path.join(rootDir, "scripts", "installPhotoshopPlugin.ps1"),
+        "",
+        "installPhotoshopPlugin.ps1",
+    );
     zip.addLocalFolder(cepReleaseDir, "com.f_know.f_record.cep");
     zip.addLocalFolder(generatorReleaseDir, "com.f_know.f_record.generator");
     zip.writeZip(zipPath);

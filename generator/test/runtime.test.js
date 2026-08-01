@@ -167,6 +167,39 @@ function wait(ms) {
         assert.deepStrictEqual(failureEvents, [["handlePixelChanged", "pixmap failed"]]);
         assert.strictEqual(recoveryCaptureCalls.length, 1);
         assert.deepStrictEqual(recoveryCaptureCalls[0].pixmap, { pixels: "recovered" });
+
+        const activeHandlers = new Set();
+        let imageChangedCallCount = 0;
+        const reloadGenerator = {
+            _logger: {},
+            addPhotoshopEventListener: (eventName, handler) => {
+                assert.strictEqual(eventName, "imageChanged");
+                activeHandlers.add(handler);
+            },
+            removePhotoshopEventListener: (eventName, handler) => {
+                assert.strictEqual(eventName, "imageChanged");
+                activeHandlers.delete(handler);
+            },
+        };
+        const reloadRuntime = createRuntime({
+            createImageChangedHandler: () => () => {
+                imageChangedCallCount += 1;
+            },
+            createPollingTask: () => ({
+                start: () => {},
+                stop: () => {},
+            }),
+        });
+
+        reloadRuntime.init(reloadGenerator, {});
+        reloadRuntime.init(reloadGenerator, {});
+        assert.strictEqual(activeHandlers.size, 1);
+        for (const handler of activeHandlers) {
+            handler({ id: 1, layers: [{ pixels: true }] });
+        }
+        assert.strictEqual(imageChangedCallCount, 1);
+        reloadRuntime.stop();
+        assert.strictEqual(activeHandlers.size, 0);
     } finally {
         if (originalUserProfile === undefined) {
             delete process.env.USERPROFILE;

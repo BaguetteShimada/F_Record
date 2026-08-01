@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Button, Content, Dialog, Flex, Item, Picker, Text } from '@adobe/react-spectrum';
+import { Button, Content, Dialog, Item, Picker, Text } from '@adobe/react-spectrum';
 import { useTranslation } from 'react-i18next';
 import type { ExportSettings } from './models';
 import type { ReplayDurationOption } from './exportDurationOptions';
@@ -24,9 +24,11 @@ function ExportReplayDialog({
     return (
         <Dialog>
             <Content>
-                <Flex direction="column">
-                    <Flex direction="row" justifyContent="space-between" marginBottom="size-100">
-                        <Text>{t('Aspect Ratio')}</Text>
+                <div className="fr-export-dialog-content">
+                    <div className="fr-field-row fr-dialog-row">
+                        <div className="fr-field-label">
+                            <Text>{t('Aspect Ratio')}</Text>
+                        </div>
                         <Picker
                             aria-label="Replay Aspect Ratio"
                             selectedKey={exportSettings.aspectRatio}
@@ -34,6 +36,7 @@ function ExportReplayDialog({
                                 applyExportStringOptionChange('aspectRatio', key, onExportSettingsChange);
                             }}
                             width="size-1600"
+                            UNSAFE_className="fr-control-picker fr-export-picker"
                         >
                             {ASPECT_RATIO_OPTIONS.map((option) => (
                                 <Item key={option.key}>
@@ -41,9 +44,11 @@ function ExportReplayDialog({
                                 </Item>
                             ))}
                         </Picker>
-                    </Flex>
-                    <Flex direction="row" justifyContent="space-between" marginBottom="size-300">
-                        <Text>{t('Duration')}</Text>
+                    </div>
+                    <div className="fr-field-row fr-dialog-row">
+                        <div className="fr-field-label">
+                            <Text>{t('Duration')}</Text>
+                        </div>
                         <Picker
                             aria-label="Replay Duration"
                             selectedKey={exportSettings.duration}
@@ -51,6 +56,7 @@ function ExportReplayDialog({
                                 applyExportStringOptionChange('duration', key, onExportSettingsChange);
                             }}
                             width="size-1600"
+                            UNSAFE_className="fr-control-picker fr-export-picker"
                         >
                             {durationOptions.map((option) => (
                                 <Item key={option.key}>
@@ -58,17 +64,18 @@ function ExportReplayDialog({
                                 </Item>
                             ))}
                         </Picker>
-                    </Flex>
-                    <Flex justifyContent="center">
+                    </div>
+                    <div className="fr-dialog-actions">
                         <Button
                             variant="accent"
                             onPress={onConfirm}
                             width="size-1200"
+                            UNSAFE_className="fr-primary-action fr-dialog-confirm-button"
                         >
                             {t('Confirm')}
                         </Button>
-                    </Flex>
-                </Flex>
+                    </div>
+                </div>
             </Content>
         </Dialog>
     );

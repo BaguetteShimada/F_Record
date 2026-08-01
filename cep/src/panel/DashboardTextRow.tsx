@@ -9,16 +9,17 @@ interface DashboardTextRowProps {
 
 function DashboardTextRow({ icon, label, value }: DashboardTextRowProps) {
     return (
-        <div className="fr-data-row">
-            <div className="fr-row-label">
+        <div className="fr-field-row fr-data-row">
+            <div className="fr-field-label fr-row-label">
                 {icon}
                 <Text>{label}</Text>
             </div>
-            <div className="fr-row-value">
+            <div className="fr-field-control fr-row-value">
                 <TextField
                     width="100%"
                     value={value}
                     isReadOnly
+                    UNSAFE_className="fr-control-field"
                 />
             </div>
         </div>

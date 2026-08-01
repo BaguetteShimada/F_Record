@@ -23,7 +23,7 @@ function SettingsPanel({configData, onConfigChange}: SettingsPanelProps) {
     const { t , i18n } = useTranslation();
 
     return(
-        <div className="fr-settings">
+        <div className="fr-panel-page fr-settings">
             <SettingsFolderSection
                 label={t('Process Image Folder')}
                 value={configData.current.processImageFolderPath}
@@ -33,7 +33,7 @@ function SettingsPanel({configData, onConfigChange}: SettingsPanelProps) {
                     selectProcessImageFolder(configData.current.processImageFolderPath, t("Select Process Image Folder"), onConfigChange);
                 }}
             />
-            <div className="fr-settings-section">
+            <div className="fr-panel-section fr-settings-section">
                 <SettingsPickerRow
                     label={t('Resolution')}
                     ariaLabel="Resolution"
@@ -75,19 +75,19 @@ function SettingsPanel({configData, onConfigChange}: SettingsPanelProps) {
                         <Item key="0">{t('Off')}</Item>,
                     ]}
                 </SettingsPickerRow>
+                <SettingsPickerRow
+                    label={t('Language')}
+                    ariaLabel="Language"
+                    selectedKey={configData.current.language}
+                    onSelectionChange={(key) => {
+                        applyLanguageChange(String(key), i18n, onConfigChange);
+                    }}
+                >
+                    {LANGUAGE_OPTIONS.map((option) => (
+                        <Item key={option.key}>{option.label}</Item>
+                    ))}
+                </SettingsPickerRow>
             </div>
-            <SettingsPickerRow
-                label={t('Language')}
-                ariaLabel="Language"
-                selectedKey={configData.current.language}
-                onSelectionChange={(key) => {
-                    applyLanguageChange(String(key), i18n, onConfigChange);
-                }}
-            >
-                {LANGUAGE_OPTIONS.map((option) => (
-                    <Item key={option.key}>{option.label}</Item>
-                ))}
-            </SettingsPickerRow>
         </div>
     )
 }

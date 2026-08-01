@@ -1,96 +1,111 @@
 # F_Record 发布流程
 
-这份流程用于从 `refactor` 分支发布 GitHub Release。不要在未完成手动验证前发布正式版本。
+这份流程用于从 `photoshop-2025-compat` 分支发布 `3.2.0`。推送版本标签后，GitHub Actions 会自动检查、构建并创建 GitHub Release；不要再手工上传本机构建的压缩包。
 
 ## 发布门槛
 
 发布前必须满足：
 
-1. `refactor` 分支已同步远端，工作树干净。
-2. 自动化检查通过：
+1. `photoshop-2025-compat` 分支已同步到 `origin`，工作树干净。
+2. 所有版本信息一致：
+   - `package.json`
+   - `cep/package.json`
+   - `generator/package.json`
+   - `cep/src/package.json`
+   - `cep/src/CSXS/manifest.xml` 中的 bundle 与扩展版本
+   - `README.md` 和 `README_EN.md` 中的当前版本与 Release 下载链接
+   - `docs/releases/3.2.0.md` 的文件名和标题
+3. 本地自动化检查通过：
+
    ```powershell
-   pnpm install
+   pnpm install --frozen-lockfile
    pnpm run check
    ```
-3. `dist/F_Record.zip` 已生成。
-4. 构建脚本确认 zip 内有必要的 CEP/Generator 入口文件。
-5. 构建脚本确认 zip 内没有 `ffmpeg`、`ffmpeg.exe`、`ffprobe`、`ffprobe.exe`。
+
+4. `dist/F_Record.zip` 已生成，且顶层包含：
+   - `installPhotoshopPlugin.ps1`
+   - `com.f_know.f_record.cep`
+   - `com.f_know.f_record.generator`
+5. 构建检查确认压缩包包含必要的 CEP/Generator 入口文件，且不包含 `ffmpeg`、`ffmpeg.exe`、`ffprobe`、`ffprobe.exe` 或原生 `.node` 模块。
 6. [手动验证清单](./manual-validation.md) 中的关键场景已完成：
-   - Photoshop 2022-2025 至少覆盖计划发布支持的版本。
-   - 开启/关闭记录正常。
-   - 过程图片保存和计数正常。
+   - Photoshop 2022–2025 至少覆盖计划发布支持的版本。
+   - 开启/关闭记录、过程图片保存和计数正常。
    - 设置项可保存并在重启后恢复。
-   - 系统 `ffmpeg/ffprobe` 的 PATH、环境变量、缺失错误提示都已验证。
-   - 导出 mp4 成功，且损坏 JPG 不会导致序列编号空洞。
+   - 系统 `ffmpeg/ffprobe` 的 PATH、环境变量和缺失错误提示均已验证。
+   - 系统 `node` 的 PATH、`F_RECORD_NODE_PATH` 和缺失错误提示均已验证。
+   - 导出 mp4 成功，损坏 JPG 不会导致序列编号空洞。
    - 旧版 `%APPDATA%\F_Record` 数据可读取。
 
-## 版本号建议
+## 版本信息
 
-当前已发布版本为 `3.0`，仓库 package 版本为 `3.1.0`。
-
-`refactor` 分支移除了随包附带的 ffmpeg/ffprobe，改为依赖系统 ffmpeg。核心功能保持不变，但安装前置条件发生变化。本轮按向后兼容的安装说明更新发布为：
-
-- `3.1.0`
-
-发布前需要同步更新：
-
-- `package.json`
-- `cep/package.json`
-- `generator/package.json`
-- `README.md` 中的当前版本和下载链接
-- `README_EN.md` 中的当前版本和下载链接
+本次正式版本为 `3.2.0`。Tag 不带 `v` 前缀，Release 标题为 `F_Record 3.2.0`，唯一发布资产为 `F_Record.zip`。发布工作流会在构建前强制核对所有 package、manifest、README 和 release notes 的版本；任何一项不一致都会终止发布。
 
 ## 发布步骤
 
-1. 确认分支和状态：
+1. 确认分支、远端和工作区状态：
+
    ```powershell
-   git checkout refactor
-   git pull
+   git switch photoshop-2025-compat
    git status --short --branch
+   git remote -v
    ```
 
-2. 更新版本号并提交：
-   ```powershell
-   git add package.json cep/package.json generator/package.json README.md README_EN.md
-   git commit -m "Release 3.1.0"
-   git push
-   ```
+2. 安装锁定依赖并运行完整检查：
 
-3. 创建 tag：
    ```powershell
-   git tag 3.1.0
-   git push fork 3.1.0
-   ```
-
-4. 生成发布包：
-   ```powershell
+   pnpm install --frozen-lockfile
    pnpm run check
    ```
 
-5. 如需在本机 Photoshop 中做最终安装验证，先关闭 Photoshop，再用管理员 PowerShell 运行：
+3. 提交版本、代码、工作流和文档，然后推送分支：
+
    ```powershell
-   .\scripts\installPhotoshopPlugin.ps1 -PhotoshopRoot "C:\Program Files\Adobe\Adobe Photoshop 2022"
+   git add --all
+   git commit -m "Release F_Record 3.2.0"
+   git push --set-upstream origin photoshop-2025-compat
    ```
-   非管理员 PowerShell 会在写权限预检阶段失败，并提示需要以管理员身份重试。
 
-6. 在 GitHub 创建 Release：
-   - 仓库：`https://github.com/BaguetteShimada/F_Record`
-   - Tag：`3.1.0`
-   - Title：`F_Record 3.1.0`
-   - Asset：上传 `dist/F_Record.zip`
+4. 在已经包含发布工作流的提交上创建带说明的标签，并推送标签：
 
-7. Release notes 至少说明：
-   - 重构 CEP 面板和 Generator 录制核心。
-   - 增加类型模型、存储层、错误处理和测试。
-   - 导出改为使用系统 `ffmpeg/ffprobe`。
-   - 安装前需要将 ffmpeg 加入 PATH，或设置 `F_RECORD_FFMPEG_PATH` 和 `F_RECORD_FFPROBE_PATH`。
-   - 保持现有 `%APPDATA%\F_Record` 数据格式。
+   ```powershell
+   git tag -a 3.2.0 -m "F_Record 3.2.0"
+   git push origin 3.2.0
+   ```
+
+5. 推送 `3.2.0` 标签后，GitHub Actions 的 Release 工作流会自动：
+   - 检出标签对应的提交。
+   - 按锁文件安装 pnpm 依赖。
+   - 运行完整检查并验证所有版本信息一致。
+   - 生成 `dist/F_Record.zip`。
+   - 使用 `docs/releases/3.2.0.md` 作为说明，创建标题为 `F_Record 3.2.0` 的 GitHub Release，并上传 `F_Record.zip`。
+
+6. 在 GitHub 上确认 Release 工作流成功，并检查：
+   - Tag 为 `3.2.0`，标题为 `F_Record 3.2.0`。
+   - Release 不是草稿或预发布版本。
+   - 可安装资产为 [F_Record.zip](https://github.com/BaguetteShimada/F_Record/releases/download/3.2.0/F_Record.zip)；GitHub 自动显示的 `Source code` 不属于安装包。
+   - 下载并解压资产后，顶层包含安装脚本和两个插件目录。
+
+## 安装冒烟验证
+
+关闭 Photoshop，在 Release 资产的解压目录中打开管理员 PowerShell。默认 Photoshop 2025 路径可直接运行：
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File .\installPhotoshopPlugin.ps1
+```
+
+自定义安装位置时追加参数：
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File .\installPhotoshopPlugin.ps1 -PhotoshopRoot "D:\Adobe Photoshop 2025"
+```
+
+可先追加 `-WhatIf` 做只读预检。若脚本不可用，按 Photoshop 2022 包的布局手工复制 `com.f_know.f_record.cep` 与 `com.f_know.f_record.generator` 两个目录，具体目标位置见项目 README。
 
 ## 回滚策略
 
-如果发布后发现 Photoshop 兼容性问题：
+如果发布后发现兼容性问题：
 
-1. 保留失败机器上的 `%APPDATA%\F_Record` 副本。
-2. 记录 Photoshop 版本、Windows 版本、ffmpeg 配置方式、失败步骤。
-3. 在 GitHub Release 中标记该版本为 prerelease 或撤下资产。
-4. 回退到上一稳定 release，并用失败数据补自动化或手动验证用例。
+1. 暂停分发并在 Release 页面清楚标记已知问题；不要静默移动已有的 `3.2.0` 标签。
+2. 保留失败机器上的 `%APPDATA%\F_Record` 副本，并记录 Photoshop、Windows、ffmpeg 和 Node.js 配置及失败步骤。
+3. 从修复提交发布新的补丁版本标签，不复用已经发布的版本号。
+4. 在修复完成前，引导用户回退到上一稳定 Release，并把失败场景补入自动化或手动验证清单。

@@ -1,0 +1,92 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "*.*.*"
+
+jobs:
+  release:
+    runs-on: windows-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 11.7.0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run checks
+        run: pnpm run check
+
+      - name: Verify release versions
+        shell: pwsh
+        run: |
+          $tag = $env:GITHUB_REF_NAME
+          if ($tag -notmatch '^\d+\.\d+\.\d+$') {
+            throw "Release tag must use the MAJOR.MINOR.PATCH format: $tag"
+          }
+
+          $packagePaths = @(
+            "package.json",
+            "cep/package.json",
+            "generator/package.json",
+            "cep/src/package.json"
+          )
+          foreach ($packagePath in $packagePaths) {
+            $packageVersion = (Get-Content -LiteralPath $packagePath -Raw | ConvertFrom-Json).version
+            if ($packageVersion -ne $tag) {
+              throw "$packagePath has version $packageVersion; expected $tag"
+            }
+          }
+
+          [xml]$manifest = Get-Content -LiteralPath "cep/src/CSXS/manifest.xml" -Raw
+          $bundleVersion = [string]$manifest.ExtensionManifest.ExtensionBundleVersion
+          if ($bundleVersion -ne $tag) {
+            throw "CEP manifest bundle version is $bundleVersion; expected $tag"
+          }
+
+          $panel = @($manifest.ExtensionManifest.ExtensionList.Extension) |
+            Where-Object { $_.Id -eq "com.F_know.F_Record.panel" } |
+            Select-Object -First 1
+          if ($null -eq $panel) {
+            throw "CEP manifest does not declare the F_Record panel"
+          }
+          $expectedPanelVersion = (($tag -split '\.')[0..1] -join '.')
+          $panelVersion = [string]$panel.Version
+          if ($panelVersion -ne $expectedPanelVersion) {
+            throw "CEP panel version is $panelVersion; expected $expectedPanelVersion"
+          }
+
+          $releaseNotesPath = "docs/releases/$tag.md"
+          if (-not (Test-Path -LiteralPath $releaseNotesPath -PathType Leaf)) {
+            throw "Release notes do not exist: $releaseNotesPath"
+          }
+          $expectedHeading = "## F_Record $tag"
+          $releaseNotes = Get-Content -LiteralPath $releaseNotesPath -Raw
+          if (-not $releaseNotes.TrimStart().StartsWith($expectedHeading)) {
+            throw "Release notes must start with: $expectedHeading"
+          }
+
+      - name: Publish GitHub Release
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $tag = $env:GITHUB_REF_NAME
+          gh release create "$tag" "dist/F_Record.zip" --repo "$env:GITHUB_REPOSITORY" --title "F_Record $tag" --notes-file "docs/releases/$tag.md" --verify-tag

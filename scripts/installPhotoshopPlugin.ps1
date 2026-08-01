@@ -1,6 +1,6 @@
 [CmdletBinding(SupportsShouldProcess = $true)]
 param(
-    [string]$PhotoshopRoot = "C:\Program Files\Adobe\Adobe Photoshop 2022",
+    [string]$PhotoshopRoot = "C:\Program Files\Adobe\Adobe Photoshop 2025",
     [string]$BuildRoot = "",
     [string]$BackupRoot = "",
     [switch]$AllowRunningPhotoshop
@@ -10,12 +10,21 @@ Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
 
 $repoRoot = (Resolve-Path -LiteralPath (Join-Path $PSScriptRoot "..")).Path
+$releasePackageRoot = [IO.Path]::GetFullPath($PSScriptRoot)
+$isReleasePackage =
+    (Test-Path -LiteralPath (Join-Path $releasePackageRoot "com.f_know.f_record.cep") -PathType Container) -and
+    (Test-Path -LiteralPath (Join-Path $releasePackageRoot "com.f_know.f_record.generator") -PathType Container)
 if ($BuildRoot.Trim() -eq "") {
-    $BuildRoot = Join-Path $repoRoot "dist"
+    $BuildRoot = if ($isReleasePackage) {
+        $releasePackageRoot
+    } else {
+        Join-Path $repoRoot "dist"
+    }
 }
 if ($BackupRoot.Trim() -eq "") {
     $timestamp = Get-Date -Format "yyyyMMdd-HHmmss"
-    $BackupRoot = Join-Path $repoRoot "validation-backups\photoshop-install-$timestamp"
+    $backupBase = if ($isReleasePackage) { $releasePackageRoot } else { $repoRoot }
+    $BackupRoot = Join-Path $backupBase "validation-backups\photoshop-install-$timestamp"
 }
 
 $PhotoshopRoot = [IO.Path]::GetFullPath($PhotoshopRoot)
@@ -29,6 +38,103 @@ function Assert-DirectoryExists {
     )
     if (-not (Test-Path -LiteralPath $Path -PathType Container)) {
         throw "$Label does not exist: $Path"
+    }
+}
+
+function Assert-FileExists {
+    param(
+        [string]$Path,
+        [string]$Label
+    )
+    if (-not (Test-Path -LiteralPath $Path -PathType Leaf)) {
+        throw "$Label does not exist: $Path"
+    }
+}
+
+function ConvertTo-NormalizedVersion {
+    param(
+        [string]$Value,
+        [string]$Label
+    )
+    if ($Value -notmatch '^\d+(\.\d+){0,3}$') {
+        throw "$Label is not a supported numeric version: $Value"
+    }
+    $parts = @($Value.Split('.'))
+    while ($parts.Count -lt 4) {
+        $parts += "0"
+    }
+    return [Version]::Parse($parts -join '.')
+}
+
+function Get-PhotoshopVersion {
+    param([string]$ExecutablePath)
+    $productVersion = (Get-Item -LiteralPath $ExecutablePath).VersionInfo.ProductVersion
+    if ([string]::IsNullOrWhiteSpace($productVersion)) {
+        throw "Photoshop executable has no product version: $ExecutablePath"
+    }
+    $versionMatch = [regex]::Match($productVersion, '^\d+(\.\d+){0,3}')
+    if (-not $versionMatch.Success) {
+        throw "Photoshop executable has an unsupported product version: $productVersion"
+    }
+    return ConvertTo-NormalizedVersion -Value $versionMatch.Value -Label "Photoshop product version"
+}
+
+function Test-VersionInCepRange {
+    param(
+        [Version]$Version,
+        [string]$Range
+    )
+    if ($Range -match '^\d+(\.\d+){0,3}$') {
+        $minimumVersion = ConvertTo-NormalizedVersion -Value $Range -Label "CEP host version"
+        return $Version -ge $minimumVersion
+    }
+
+    $rangeMatch = [regex]::Match(
+        $Range,
+        '^(?<lowerDelimiter>[\[\(])(?<lower>\d+(\.\d+){0,3}),(?<upper>\d+(\.\d+){0,3})(?<upperDelimiter>[\]\)])$'
+    )
+    if (-not $rangeMatch.Success) {
+        throw "Unsupported CEP host version range: $Range"
+    }
+
+    $lowerVersion = ConvertTo-NormalizedVersion -Value $rangeMatch.Groups['lower'].Value -Label "CEP lower host version"
+    $upperVersion = ConvertTo-NormalizedVersion -Value $rangeMatch.Groups['upper'].Value -Label "CEP upper host version"
+    $meetsLowerBound = if ($rangeMatch.Groups['lowerDelimiter'].Value -eq '[') {
+        $Version -ge $lowerVersion
+    } else {
+        $Version -gt $lowerVersion
+    }
+    $meetsUpperBound = if ($rangeMatch.Groups['upperDelimiter'].Value -eq ']') {
+        $Version -le $upperVersion
+    } else {
+        $Version -lt $upperVersion
+    }
+    return $meetsLowerBound -and $meetsUpperBound
+}
+
+function Assert-CepManifestSupportsPhotoshop {
+    param(
+        [string]$ManifestPath,
+        [Version]$PhotoshopVersion
+    )
+    Assert-FileExists -Path $ManifestPath -Label "CEP manifest"
+    try {
+        [xml]$manifest = Get-Content -LiteralPath $ManifestPath -Raw
+    } catch {
+        throw "CEP manifest is not valid XML: $ManifestPath`n$($_.Exception.Message)"
+    }
+
+    foreach ($hostName in @("PHXS", "PHSP")) {
+        $hostEntry = @($manifest.ExtensionManifest.ExecutionEnvironment.HostList.Host) |
+            Where-Object { $_.Name -eq $hostName } |
+            Select-Object -First 1
+        if ($null -eq $hostEntry) {
+            throw "CEP manifest does not declare the Photoshop host ${hostName}: $ManifestPath"
+        }
+        $hostRange = [string]$hostEntry.Version
+        if (-not (Test-VersionInCepRange -Version $PhotoshopVersion -Range $hostRange)) {
+            throw "CEP manifest host $hostName range $hostRange does not support Photoshop $PhotoshopVersion"
+        }
     }
 }
 
@@ -84,6 +190,12 @@ function Get-PhotoshopProcesses {
 
 Assert-DirectoryExists -Path $PhotoshopRoot -Label "Photoshop root"
 Assert-DirectoryExists -Path $BuildRoot -Label "Build root"
+$photoshopExecutable = Join-Path $PhotoshopRoot "Photoshop.exe"
+Assert-FileExists -Path $photoshopExecutable -Label "Photoshop executable"
+$photoshopVersion = Get-PhotoshopVersion -ExecutablePath $photoshopExecutable
+$cepManifestPath = Join-Path $BuildRoot "com.f_know.f_record.cep\CSXS\manifest.xml"
+Assert-CepManifestSupportsPhotoshop -ManifestPath $cepManifestPath -PhotoshopVersion $photoshopVersion
+Write-Output "Target Photoshop: $PhotoshopRoot (version $photoshopVersion)"
 
 $pluginPairs = @(
     [PSCustomObject]@{
@@ -106,6 +218,7 @@ foreach ($pair in $pluginPairs) {
         Assert-DirectoryWritable -Path $targetParent -Label "$($pair.Name) install parent"
     }
 }
+Assert-NoBundledExportBinaries -Paths ($pluginPairs | ForEach-Object { $_.Source })
 
 if (-not $AllowRunningPhotoshop) {
     $runningPhotoshop = @(Get-PhotoshopProcesses)
@@ -115,7 +228,9 @@ if (-not $AllowRunningPhotoshop) {
     }
 }
 
-New-Item -ItemType Directory -Force -Path $BackupRoot | Out-Null
+if (-not $WhatIfPreference) {
+    New-Item -ItemType Directory -Force -Path $BackupRoot | Out-Null
+}
 
 foreach ($pair in $pluginPairs) {
     if (Test-Path -LiteralPath $pair.Target) {
@@ -132,5 +247,9 @@ foreach ($pair in $pluginPairs) {
     }
 }
 
-Assert-NoBundledExportBinaries -Paths ($pluginPairs | ForEach-Object { $_.Target })
-Write-Output "Install complete. BackupRoot=$BackupRoot"
+if ($WhatIfPreference) {
+    Write-Output "Preflight complete. No files were changed."
+} else {
+    Assert-NoBundledExportBinaries -Paths ($pluginPairs | ForEach-Object { $_.Target })
+    Write-Output "Install complete. BackupRoot=$BackupRoot"
+}

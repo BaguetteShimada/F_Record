@@ -61,7 +61,8 @@ function calculateExportVideoSize(configData, documentValue, exportSettings) {
 }
 
 function calculateExportProgress(statusInfo, index, percent) {
-    const clampedPercent = Math.min(Math.max(percent, 0), 1);
+    const safePercent = Number.isFinite(percent) ? percent : 0;
+    const clampedPercent = Math.min(Math.max(safePercent, 0), 1);
     let nowPercent = 0;
     for (let i = 0; i < index; i++) {
         nowPercent += statusInfo[i].ratio;

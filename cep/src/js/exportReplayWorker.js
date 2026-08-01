@@ -2,6 +2,9 @@ const path = require('path');
 const fs = require('fs');
 const { spawn } = require('child_process');
 
+const DEFAULT_EXPORT_WORKER_TIMEOUT_MS = 30 * 60 * 1000;
+const OUTPUT_TAIL_LIMIT = 4096;
+
 function runExportReplayWorker(exportParams, onProgress, options = {}) {
     const spawnFn = options.spawn || spawn;
     const workerPath = options.workerPath || path.join(options.baseDir || __dirname, 'exportReplay.js');
@@ -11,14 +14,21 @@ function runExportReplayWorker(exportParams, onProgress, options = {}) {
         fs: options.fs,
         platform: options.platform,
     });
+    const timeoutMs = options.timeoutMs === undefined ? DEFAULT_EXPORT_WORKER_TIMEOUT_MS : options.timeoutMs;
 
     return new Promise((resolve, reject) => {
         let settled = false;
         let worker = null;
+        let timeout = null;
+        const output = {
+            stdout: "",
+            stderr: "",
+        };
 
         const resolveOnce = () => {
             if (!settled) {
                 settled = true;
+                clearWorkerTimeout(timeout);
                 cleanupWorker(worker);
                 resolve();
             }
@@ -27,6 +37,7 @@ function runExportReplayWorker(exportParams, onProgress, options = {}) {
         const rejectOnce = (error) => {
             if (!settled) {
                 settled = true;
+                clearWorkerTimeout(timeout);
                 cleanupWorker(worker);
                 reject(error);
             }
@@ -37,9 +48,14 @@ function runExportReplayWorker(exportParams, onProgress, options = {}) {
                 stdio: ['pipe', 'pipe', 'pipe', 'ipc'],
             });
         } catch (error) {
-            rejectOnce(error);
+            rejectOnce(createSpawnError(error, nodeCommand));
             return;
         }
+
+        consumeWorkerOutput(worker, output);
+        timeout = startWorkerTimeout(timeoutMs, () => {
+            rejectOnce(createWorkerTimeoutError(timeoutMs, output));
+        });
 
         worker.on('message', (message) => {
             if (!message || typeof message.type !== 'string') {
@@ -75,7 +91,7 @@ function runExportReplayWorker(exportParams, onProgress, options = {}) {
                 rejectOnce(new Error("Worker exited before export completed"));
                 return;
             }
-            rejectOnce(createWorkerExitError(code, signal));
+            rejectOnce(createWorkerExitError(code, signal, output));
         });
 
         try {
@@ -84,6 +100,43 @@ function runExportReplayWorker(exportParams, onProgress, options = {}) {
             rejectOnce(error);
         }
     });
+}
+
+function consumeWorkerOutput(worker, output) {
+    consumeStream(worker && worker.stdout, chunk => {
+        output.stdout = appendOutputTail(output.stdout, chunk);
+    });
+    consumeStream(worker && worker.stderr, chunk => {
+        output.stderr = appendOutputTail(output.stderr, chunk);
+    });
+}
+
+function consumeStream(stream, onData) {
+    if (!stream || typeof stream.on !== 'function') {
+        return;
+    }
+    stream.on('data', onData);
+}
+
+function appendOutputTail(currentValue, chunk) {
+    const nextValue = currentValue + String(chunk);
+    if (nextValue.length <= OUTPUT_TAIL_LIMIT) {
+        return nextValue;
+    }
+    return nextValue.slice(nextValue.length - OUTPUT_TAIL_LIMIT);
+}
+
+function startWorkerTimeout(timeoutMs, onTimeout) {
+    if (!Number.isFinite(timeoutMs) || timeoutMs <= 0) {
+        return null;
+    }
+    return setTimeout(onTimeout, timeoutMs);
+}
+
+function clearWorkerTimeout(timeout) {
+    if (timeout !== null) {
+        clearTimeout(timeout);
+    }
 }
 
 function cleanupWorker(worker) {
@@ -106,11 +159,48 @@ function cleanupWorker(worker) {
     }
 }
 
-function createWorkerExitError(code, signal) {
+function createWorkerExitError(code, signal, output = {}) {
+    const stderr = formatWorkerOutput(output.stderr);
     if (signal) {
-        return new Error(`Worker exited with signal ${signal}`);
+        return createErrorWithCode(`Worker exited with signal ${signal}${stderr}`, "EXPORT_WORKER_EXITED");
     }
-    return new Error(`Worker exited with code ${code}`);
+    return createErrorWithCode(`Worker exited with code ${code}${stderr}`, "EXPORT_WORKER_EXITED");
+}
+
+function createWorkerTimeoutError(timeoutMs, output = {}) {
+    return createErrorWithCode(
+        `Export worker timed out after ${timeoutMs}ms${formatWorkerOutput(output.stderr)}`,
+        "EXPORT_WORKER_TIMEOUT",
+    );
+}
+
+function createSpawnError(error, nodeCommand) {
+    if (error && (error.code === "ENOENT" || error.code === "EACCES")) {
+        const nodeError = createMissingNodeRuntimeError(nodeCommand);
+        nodeError.cause = error;
+        return nodeError;
+    }
+    return error;
+}
+
+function createMissingNodeRuntimeError(source) {
+    return createErrorWithCode(
+        `Node.js runtime is not available (${source}). Set F_RECORD_NODE_PATH to the full path of node.exe, or install Node.js so node.exe is available in PATH.`,
+        "MISSING_NODE_RUNTIME",
+    );
+}
+
+function createErrorWithCode(message, code) {
+    const error = new Error(message);
+    error.code = code;
+    return error;
+}
+
+function formatWorkerOutput(value) {
+    if (typeof value !== "string" || value.trim() === "") {
+        return "";
+    }
+    return `\nstderr:\n${value.trim()}`;
 }
 
 function resolveNodeCommand(options = {}) {
@@ -121,6 +211,9 @@ function resolveNodeCommand(options = {}) {
     const envPath = readEnvPath(['F_RECORD_NODE_PATH'], env);
 
     if (envPath !== null) {
+        if (!isFile(envPath, fsImpl)) {
+            throw createMissingNodeRuntimeError(envPath);
+        }
         return envPath;
     }
 
@@ -209,8 +302,10 @@ function toWorkerError(data) {
 }
 
 module.exports = {
+    DEFAULT_EXPORT_WORKER_TIMEOUT_MS,
     cleanupWorker,
     createWorkerExitError,
+    createWorkerTimeoutError,
     resolveNodeCommand,
     runExportReplayWorker,
     toWorkerError,

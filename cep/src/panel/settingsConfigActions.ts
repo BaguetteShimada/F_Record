@@ -1,4 +1,9 @@
-import type { ConfigData } from './models';
+import {
+    normalizeIdleTimeout,
+    normalizeQuality,
+    normalizeResolution,
+    type ConfigData,
+} from './models';
 
 export type SettingsStringConfigKey = 'resolution' | 'quality' | 'idleTimeout';
 type SelectionKey = string | number;
@@ -11,13 +16,13 @@ export function applySettingsStringConfigChange(
     const value = String(selectedKey);
     switch (configKey) {
         case 'resolution':
-            onConfigChange({ resolution: value });
+            onConfigChange({ resolution: normalizeResolution(value) });
             break;
         case 'quality':
-            onConfigChange({ quality: value });
+            onConfigChange({ quality: normalizeQuality(value) });
             break;
         case 'idleTimeout':
-            onConfigChange({ idleTimeout: value });
+            onConfigChange({ idleTimeout: normalizeIdleTimeout(value) });
             break;
     }
 }

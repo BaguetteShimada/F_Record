@@ -10,7 +10,7 @@ https://github.com/user-attachments/assets/0221cee9-ac70-48d1-b85a-b85667813b90
 
 **插件原理**：调用PS生成器的接口，当画布发生变化时截取过程图片，最后将图片连起来生成录像。
 
-**当前插件版本**：3.1.0
+**当前插件版本**：3.2.0
 
 **支持系统**：Windows
 
@@ -25,22 +25,33 @@ https://github.com/user-attachments/assets/0221cee9-ac70-48d1-b85a-b85667813b90
 1. 安装 ffmpeg，并确认系统环境中可以直接运行 `ffmpeg` 和 `ffprobe`。
    推荐将 ffmpeg 的 `bin` 目录加入 Windows 的 `PATH`。如果不想改 PATH，也可以分别设置环境变量 `F_RECORD_FFMPEG_PATH` 和 `F_RECORD_FFPROBE_PATH`，指向 `ffmpeg.exe` 和 `ffprobe.exe` 的完整路径。
 
-2. 下载插件压缩包[F_Record.zip](https://github.com/BaguetteShimada/F_Record/releases/download/3.1.0/F_Record.zip)，解压，打开文件夹。
+2. 导出视频时会启动一个独立的 Node.js worker。请确认系统环境中可以直接运行 `node`，或设置环境变量 `F_RECORD_NODE_PATH`，指向 `node.exe` 的完整路径。
 
-3. 将内部的两个文件夹`com.f_know.f_record.cep`和`com.f_know.f_record.generator`放到PS主目录下的相应位置。
-   PS主目录的路径形如`D:\Adobe Photoshop 2022`。
-   判断有没有找对是看其中有没有PS的可执行文件`Photoshop.exe`，而不是快捷方式。
+3. 从 GitHub Release 下载发布资产 [F_Record.zip](https://github.com/BaguetteShimada/F_Record/releases/download/3.2.0/F_Record.zip) 并解压。请勿下载 GitHub 自动生成的 `Source code` 压缩包，它不是可安装的插件包。
 
-    • 将`com.f_know.f_record.cep`文件夹放到形如`D:\Adobe Photoshop 2022\Required\CEP\extensions`的路径下。
+4. 关闭 Photoshop，在解压目录中打开**管理员 PowerShell**，运行：
 
-    • 将`com.f_know.f_record.generator`文件夹放到形如`D:\Adobe Photoshop 2022\Plug-ins\Generator`的路径下。
+   ```powershell
+   powershell -NoProfile -ExecutionPolicy Bypass -File .\installPhotoshopPlugin.ps1
+   ```
 
-    注意，有可能你的PS下缺少某个路径，比如Plug-ins下没有Generator文件夹，这时需要你手动创建一个。
+   脚本默认安装到 `C:\Program Files\Adobe\Adobe Photoshop 2025`，并会检查 Photoshop 版本、插件清单和目标目录。如果 Photoshop 安装在其他位置，请指定路径：
 
-4. 打开PS，依次点开"编辑-首选项-增效工具"，看看"启用生成器"和"载入扩展面板"是否勾选。
+   ```powershell
+   powershell -NoProfile -ExecutionPolicy Bypass -File .\installPhotoshopPlugin.ps1 -PhotoshopRoot "D:\Adobe Photoshop 2025"
+   ```
+
+5. 如果无法使用安装脚本，也可以沿用 Photoshop 2022 版本的手工安装方式：把解压目录中的两个插件文件夹复制到 Photoshop 主目录下的对应位置。Photoshop 主目录形如 `D:\Adobe Photoshop 2025`（其他支持版本替换对应年份），并应包含真正的 `Photoshop.exe`，而不是快捷方式。
+
+   - 将 `com.f_know.f_record.cep` 复制到 `D:\Adobe Photoshop 2025\Required\CEP\extensions`。
+   - 将 `com.f_know.f_record.generator` 复制到 `D:\Adobe Photoshop 2025\Plug-ins\Generator`。
+
+   如果 `extensions` 或 `Generator` 目录不存在，请手动创建。
+
+6. 打开PS，依次点开"编辑-首选项-增效工具"，看看"启用生成器"和"载入扩展面板"是否勾选。
    如果没有勾选，则需要勾上后重启PS，如果已经勾选，则不需要重启。
 
-5. 最后，在PS的"窗口-扩展（旧版）"中就能找到插件，点开后即可正常使用。
+7. 最后，在PS的"窗口-扩展（旧版）"中就能找到插件，点开后即可正常使用。
 
 ## 使用说明
 

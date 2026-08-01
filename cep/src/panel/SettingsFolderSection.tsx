@@ -18,24 +18,30 @@ function SettingsFolderSection({
     onSelectFolder,
 }: SettingsFolderSectionProps) {
     return (
-        <div className="fr-settings-section">
-            <Text marginBottom="size-100">{label}</Text>
-            <div className="fr-settings-folder-row">
+        <div className="fr-panel-section fr-settings-section fr-settings-folder-section">
+            <div className="fr-field-row fr-settings-row">
+                <div className="fr-field-label fr-settings-label">
+                    <Text>{label}</Text>
+                </div>
+                <div className="fr-field-control fr-control-group fr-settings-folder-row">
                 <TextField
                     aria-label="Process Image Folder"
                     value={value}
                     isReadOnly
                     width="100%"
+                    UNSAFE_className="fr-control-field fr-settings-folder-field"
                 />
                 <TooltipTrigger delay={0}>
                     <ActionButton
                         aria-label={buttonLabel}
                         onPress={onSelectFolder}
+                        UNSAFE_className="fr-icon-button fr-settings-folder-button"
                     >
                         <FolderOpen />
                     </ActionButton>
                     <Tooltip>{tooltipLabel}</Tooltip>
                 </TooltipTrigger>
+                </div>
             </div>
         </div>
     );

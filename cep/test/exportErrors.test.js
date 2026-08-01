@@ -53,6 +53,13 @@ assert.deepStrictEqual(
     { key: "Export binary missing", values: { binaryName: "ffmpeg" } },
 );
 
+const missingNode = new Error("missing node");
+missingNode.code = "MISSING_NODE_RUNTIME";
+assert.deepStrictEqual(
+    normalize(getExportFailureMessageDescriptor(missingNode)),
+    { key: "Export node runtime missing" },
+);
+
 const unknownError = new Error("unexpected");
 unknownError.code = "UNEXPECTED";
 assert.deepStrictEqual(

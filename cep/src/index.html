@@ -9,10 +9,22 @@
         html, body {
             margin: 0;
             height: 100%;
-            background: white;
+            overflow-x: hidden;
+            background: #424242;
+            resize: none !important;
         }
         ::-webkit-scrollbar {
-            display: none;
+            display: none !important;
+            width: 0 !important;
+            height: 0 !important;
+        }
+        ::-webkit-scrollbar-corner,
+        ::-webkit-resizer {
+            display: none !important;
+            width: 0 !important;
+            height: 0 !important;
+            background: transparent !important;
+            opacity: 0 !important;
         }
     </style>
     <script src="js/CSInterface-6.1.0.js"></script>

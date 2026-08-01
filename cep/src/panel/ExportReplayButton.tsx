@@ -54,7 +54,7 @@ function ExportReplayButton({
                     <Button 
                         variant="accent" 
                         isDisabled={isExportReplayDisabled(documentValue)}
-                        UNSAFE_className="fr-export-button"
+                        UNSAFE_className="fr-primary-action fr-export-button"
                     >
                         <Replay size="S" />
                         <Text>{t('Export')}</Text>

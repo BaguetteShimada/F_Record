@@ -1,19 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<ExtensionManifest Version="5.0" ExtensionBundleId="com.F_know.F_Record" ExtensionBundleVersion="3.1.0" ExtensionBundleName="F_Record" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<ExtensionManifest Version="5.0" ExtensionBundleId="com.F_know.F_Record" ExtensionBundleVersion="3.2.0" ExtensionBundleName="F_Record" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
     <ExtensionList>
-        <Extension Id="com.F_know.F_Record.panel" Version="3.1"/>
+        <Extension Id="com.F_know.F_Record.panel" Version="3.2"/>
     </ExtensionList>
     <ExecutionEnvironment>
         <HostList>
-            <!-- Photoshop >= CC2018 -->
-            <Host Name="PHXS" Version="23.0"/>
-            <Host Name="PHSP" Version="23.0"/>
+            <!-- Photoshop 2022 (23.x) through Photoshop 2025 (26.x) -->
+            <Host Name="PHXS" Version="[23.0,27.0)"/>
+            <Host Name="PHSP" Version="[23.0,27.0)"/>
         </HostList>
         <LocaleList>
             <Locale Code="All"/>
         </LocaleList>
         <RequiredRuntimeList>
-            <RequiredRuntime Name="CSXS" Version="6.0"/>
+            <RequiredRuntime Name="CSXS" Version="7.0"/>
         </RequiredRuntimeList>
     </ExecutionEnvironment>
     <DispatchInfoList>
